@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<h1>data collector index</h1>
+</body>
+
+<script>
+    //ws://127.0.0.1:8000/ws/chat/lobby/
+    var socket = new WebSocket('ws://127.0.0.1:8000/ws/data_collector/');
+
+    socket.onmessage = function(e) {
+        var data = JSON.parse(e.data);
+        var message = data['message'];
+        console.log(data)
+    };
+
+    socket.onclose = function(e) {
+        console.error('Socket closed unexpectedly');
+    };
+
+    socket.onopen = () => {
+        socket.send('{"message":"hi from index"}')
+    }
+</script>
+</html>
