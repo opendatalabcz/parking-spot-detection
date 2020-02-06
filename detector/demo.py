@@ -27,7 +27,6 @@ image = skimage.io.imread("test1.jpg")
 
 r, rects = car_detector.detect_cars(image)
 
-car_detector.visualize(image, r)
 print(rects)
 
 
