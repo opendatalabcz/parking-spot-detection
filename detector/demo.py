@@ -14,6 +14,7 @@ import mrcnn.coco.coco as coco
 import cv2
 from models import MaskModel
 from car_detectors import MaskCarDetector
+
 matplotlib.use('TkAgg')
 WEIGHTS_PATH = "mrcnn/mask_rcnn_coco.h5"
 
