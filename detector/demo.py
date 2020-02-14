@@ -1,19 +1,8 @@
-
-import os
-import sys
-import random
-import math
-import numpy as np
-import skimage.io
 import matplotlib
-import matplotlib.pyplot as plt
-from mrcnn import utils
-import mrcnn.model as modellib
-from mrcnn import visualize
-import mrcnn.coco.coco as coco
-import cv2
-from models import MaskModel
+import skimage.io
 from car_detectors import MaskCarDetector
+
+from models import MaskModel
 
 matplotlib.use('TkAgg')
 WEIGHTS_PATH = "mrcnn/mask_rcnn_coco.h5"

@@ -41,8 +41,8 @@ class MaskCarDetector(IDetector):
     def detect_cars(self, image):
         r = self.model.detect([image], verbose=0)
         r = r[0]
-        rects = [Rect.from_array([r['rois'][i][1], r['rois'][i][0], r['rois'][i][3], r['rois'][i][2]]) for i in range(len(r['rois']))
-                 if r["class_ids"][i] == 3 or r["class_ids"][i] == 8]
+        rects = [Rect.from_array([r['rois'][i][1], r['rois'][i][0], r['rois'][i][3], r['rois'][i][2]]) for i in range(len(r['rois']))]
+                 # if r["class_ids"][i] == 3 or r["class_ids"][i] == 8]
         return r, rects
 
     def visualize(self, image, r):

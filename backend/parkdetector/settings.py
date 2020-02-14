@@ -11,10 +11,10 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+from .db_secrets import DB_PASS, DB_USER
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
@@ -27,19 +27,16 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
-    'channels',
-    'data_collector',
-    'chat',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'kafka_consumer.apps.KafkaConsumerConfig',
 ]
 
 MIDDLEWARE = [
@@ -73,20 +70,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'parkdetector.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        'TEST': {
-            'NAME': os.path.join(BASE_DIR, 'db_test.sqlite3')
-        }
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'park_db',
+        'USER': DB_USER,
+        'PASSWORD': DB_PASS,
+        'HOST': 'localhost',
+        'PORT': 5432,
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -106,7 +102,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
@@ -120,23 +115,27 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
-ASGI_APPLICATION = 'parkdetector.routing.application'
-# CHANNEL_LAYERS = {
-#     'default': {
-#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
-#         'CONFIG': {
-#             "hosts": [('127.0.0.1', 6379)],
+import os
+
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'handlers': {
+#         'console': {
+#             'class': 'logging.StreamHandler',
+#         },
+#     },
+#     'loggers': {
+#         'django': {
+#             'handlers': ['console'],
+#             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
 #         },
 #     },
 # }
-
-import os
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -144,11 +143,35 @@ LOGGING = {
         'console': {
             'class': 'logging.StreamHandler',
         },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'debug.log'),
+        },
+
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagte': True
         },
     },
+}
+LOGPIPE = {
+    'OFFSET_BACKEND': 'logpipe.backend.kafka.ModelOffsetStore',
+    'CONSUMER_BACKEND': 'logpipe.backend.kafka.Consumer',
+    'PRODUCER_BACKEND': 'logpipe.backend.kafka.Producer',
+    'KAFKA_BOOTSTRAP_SERVERS': [
+        'localhost:9092'
+    ],
+    'KAFKA_CONSUMER_KWARGS': {
+        'group_id': 'django-logpipe',
+    },
+
+    # Optional Settings
+    # 'KAFKA_SEND_TIMEOUT': 10,
+    # 'KAFKA_MAX_SEND_RETRIES': 0,
+    # 'MIN_MESSAGE_LAG_MS': 0,
+    # 'DEFAULT_FORMAT': 'json',
 }

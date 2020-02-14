@@ -2,6 +2,8 @@ from kafka import KafkaConsumer
 from common.consumers import MessageConsumer
 from common.producers import MessageProducer
 from time import sleep
+from common.messages import ImageMessage
+import json
 
 import cv2
 import numpy as np
@@ -19,9 +21,6 @@ def get_message_value(msg):
         return list(msg.values())[0][0].value.decode("UTF-8")
     return None
 
-
-
-
 while True:
     sleep(1)
     msg = poll_message()
@@ -34,9 +33,9 @@ while True:
 
     if capture is not None:
         ret, frame = capture.read()
-        producer.send("topic.detector", frame.tobytes())
-        print(frame.shape)
-        print(frame.dtype)
+        msg = ImageMessage("topic.backend", frame.shape, frame, str(frame.dtype))
+
+        producer.send("topic.detector", msg.serialize())
 
 
 
