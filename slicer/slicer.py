@@ -8,8 +8,8 @@ import json
 import cv2
 import numpy as np
 
-consumer = MessageConsumer("topic.slicer")
-producer = MessageProducer()
+consumer = MessageConsumer("topic.slicer", value_deserializer=lambda val: val.decode("UTF-8"))
+producer = MessageProducer(value_serializer= lambda val: val.encode("UTF-8"))
 stream = "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov"
 capture = cv2.VideoCapture(stream)
 
@@ -33,7 +33,7 @@ while True:
 
     if capture is not None:
         ret, frame = capture.read()
-        msg = ImageMessage("topic.backend", frame.shape, frame, str(frame.dtype))
+        msg = ImageMessage("topic.backend", frame.shape, frame, str(frame.dtype), 1)
 
         producer.send("topic.detector", msg.serialize())
 
