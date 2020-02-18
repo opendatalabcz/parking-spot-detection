@@ -1,22 +1,8 @@
-from timeit import default_timer as timer
-
+import cv2
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
+from scene import Scene
 
-from yolo import YOLO
-
-from parker.scene import Scene
-from parker.rect import Rect
-from parker.detectors.image_detector import YOLOImageDetector
-import cv2
-
-from timeit import default_timer as timer
-
-from rx.subjects import ReplaySubject
-
-import stream_endpoint
-
-stream_subject = ReplaySubject()
 
 def pil_img_to_cv2(pil_image):
     return cv2.cvtColor(np.array(pil_image), cv2.COLOR_BGR2RGB)
@@ -24,9 +10,8 @@ def pil_img_to_cv2(pil_image):
 
 class SceneManager:
 
-    def __init__(self, detector):
+    def __init__(self):
         self.scene = Scene()
-        self.detector = detector
 
     def visualize(self, image, scene: "Scene"):
         image = Image.fromarray(image)
@@ -74,43 +59,5 @@ class SceneManager:
                     outline=spot.get_draw_color())
         return image
 
-    def start(self, video_path):
-        vid = cv2.VideoCapture(video_path)
-
-        if not vid.isOpened():
-            raise IOError("Couldn't open video.")
-
-        while True:
-
-
-            start = timer()
-
-
-            return_value, frame = vid.read()
-
-            if not return_value:
-                break
-
-            # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            image = frame
-            data, rects = self.detector.detect_cars(image)
-            print("Inference FPS: {}".format(1 / (timer() - start)))
-
-
-            # image = Image.fromarray(image)
-            self.scene.process_data(rects)
-
-            # self.detector.visualize(image, data)
-            image = self.visualize(image, self.scene)
-            image = pil_img_to_cv2(image)
-            cv2.imshow("frame", image)
-
-            stream_endpoint.set_output_frame(image)
-
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                pass
-
-            print("Image FPS: {}".format(1/(timer() - start)))
-
-
-
+    def update(self, rects):
+        self.scene.process_data(rects)

@@ -1,16 +1,17 @@
-from kafka import KafkaConsumer
-from common.consumers import MessageConsumer
-from common.producers import MessageProducer
 from time import sleep
-from common.messages import ImageMessage
-import json
 
 import cv2
-import numpy as np
+
+import os
+
+from common.consumers import MessageConsumer
+from common.messages import ImageMessage
+from common.producers import MessageProducer
 
 consumer = MessageConsumer("topic.slicer", value_deserializer=lambda val: val.decode("UTF-8"))
-producer = MessageProducer(value_serializer= lambda val: val.encode("UTF-8"))
-stream = "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov"
+producer = MessageProducer(value_serializer=lambda val: val.encode("UTF-8"), max_request_size=3173440261)
+stream = "movie2.mp4"
+# stream = "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov"
 capture = cv2.VideoCapture(stream)
 
 def poll_message():
@@ -23,19 +24,28 @@ def get_message_value(msg):
 
 while True:
     sleep(1)
-    msg = poll_message()
-    value = get_message_value(msg)
-
+    # msg = poll_message()
+    # value = get_message_value(msg)
+    value = stream
     if value is not None:
         stream = value
         capture = cv2.VideoCapture(stream)
-        print(value)
+
 
     if capture is not None:
         ret, frame = capture.read()
+        
+        if not ret:
+            capture = None
+            continue
+
+            
         msg = ImageMessage("topic.backend", frame.shape, frame, str(frame.dtype), 1)
 
+        print(msg.serialize())
+
         producer.send("topic.detector", msg.serialize())
+        producer.flush()
 
 
 

@@ -7,6 +7,7 @@ import multiprocessing
 from common.consumers import MessageConsumer
 from rx.scheduler import ThreadPoolScheduler
 from common.messages import DetectorMessage
+import threading
 import json
 
 consumer = MessageConsumer("topic.backend", value_deserializer=lambda val: val.decode("UTF-8"))
@@ -29,11 +30,9 @@ class KafkaConsumerConfig(AppConfig):
     def ready(self):
         from .models import DetectorResult
         def parse(message):
-            print(message)
             msg = DetectorMessage.from_serialized(message.value)
-            print(msg)
-            print(msg.timestamp)
-            print(msg.rects)
+            new = DetectorResult.objects.create(timestamp=msg.timestamp, rects=json.dumps(msg.rects), lot_id=msg.lot_id)
+            print(new)
 
         print("ready")
         kafka_observer.pipe(

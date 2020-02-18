@@ -13,6 +13,9 @@ class Rect(object):
     def to_array(self):
         return self.coords
 
+    def to_native_array(self):
+        return [int(coord) for coord in self.coords]
+
     def __init__(self, left, top, right, bottom):
         self.coords = [left, top, right, bottom]
         self.left = left
@@ -35,7 +38,7 @@ class Rect(object):
     def iou(self, other) -> float:
         if not self.intersect(other):
             return 0.0
-        
+
         if self.is_inside(other) or other.is_inside(self):
             return 1
 
@@ -48,10 +51,10 @@ class Rect(object):
         inter_rect_area = Rect.from_array(points).area()
         assert inter_rect_area >= 0
         return inter_rect_area / (self.area() + other.area() - inter_rect_area)
-    
+
     def is_inside(self, other):
         return self.left > other.left and self.top > other.top and self.right < other.right and self.bottom < other.bottom
-    
+
     def intersect(self, other):
         this_center_x, this_center_y = self.center()
         other_center_x, other_center_y = other.center()

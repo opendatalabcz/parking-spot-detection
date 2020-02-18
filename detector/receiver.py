@@ -16,18 +16,8 @@ mask.load_weights(WEIGHTS_PATH)
 
 car_detector = MaskCarDetector(mask.model)
 
-consumer = MessageConsumer("topic.detector", value_deserializer=lambda val: val.decode("UTF-8"))
+consumer = MessageConsumer("topic.detector", value_deserializer=lambda val: val.decode("UTF-8"), fetch_max_bytes=1024*1024*40, max_partition_fetch_bytes=1024*1024*50)
 producer = MessageProducer(value_serializer=lambda val: val.encode("UTF-8"))
-#
-# def poll_message():
-#     return consumer.poll(max_records=1)
-#
-#
-# def get_message_value(msg):
-#     if msg != {}:
-#         return list(msg.values())[0][0].value
-#     return None
-
 
 for msg in consumer:
     image_msg = ImageMessage.from_serialized(msg.value)
@@ -36,9 +26,7 @@ for msg in consumer:
     cv2.waitKey(1)
     r, rects = car_detector.detect_cars(image_msg.image)
 
-    detector_msg = DetectorMessage(datetime.now().timestamp(), image_msg.lot_id, rects)
+    detector_msg = DetectorMessage(datetime.now().timestamp(), image_msg.lot_id, [rect.to_native_array() for rect in rects])
 
-    print(image_msg.target_topic)
-    print(detector_msg.serialize())
     producer.send(image_msg.target_topic, detector_msg.serialize())
     print(rects)

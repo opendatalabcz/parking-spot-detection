@@ -1,6 +1,6 @@
 import skimage.io
 from PIL import Image, ImageDraw
-from rect import Rect
+from common.rect import Rect
 import cv2
 import numpy as np
 

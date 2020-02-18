@@ -1,5 +1,5 @@
-from .rect import Rect
-from parker.states.state import AcceptedOccupiedState, AcceptedFreeState, DecayedState, PendingState
+from common.rect import Rect
+from state import AcceptedOccupiedState, AcceptedFreeState, DecayedState, PendingState
 
 
 class Spot(object):
