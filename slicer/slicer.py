@@ -39,7 +39,7 @@ while True:
             capture = None
             continue
 
-            
+        cv2.imwrite("test.jpg", frame)
         msg = ImageMessage("topic.backend", frame.shape, frame, str(frame.dtype), 1)
 
         print(msg.serialize())

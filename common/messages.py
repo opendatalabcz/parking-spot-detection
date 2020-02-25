@@ -1,8 +1,9 @@
-import numpy as np
-import json
 import base64
-import zlib
+import json
 import pickle
+
+import numpy as np
+
 
 class Serializable(object):
 
@@ -32,7 +33,6 @@ class SlicerMessage(Serializable):
     def from_serialized(serialized):
         data = json.loads(serialized)
         return SlicerMessage(data["target_topic"], data["source_url"], data["lot_id"])
-
 
 
 class DetectorMessage(Serializable):
