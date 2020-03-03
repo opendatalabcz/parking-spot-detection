@@ -1,0 +1,55 @@
+from collections import defaultdict
+
+import rx
+import rx.operators as ops
+from rx.scheduler import ThreadPoolScheduler
+import cv2
+from common import topics
+from common.consumers import MessageConsumer
+from common.producers import MessageProducer
+from common.messages import DetectorMessage
+from common.messages import DetectorMessage, ImageMessage, SpotterMesssage, LotStatusMessage
+from common.rect import Rect
+from PIL import Image, ImageDraw
+import numpy as np
+from park_model import ParkModel
+import tensorflow as tf
+gpus = tf.config.experimental.list_physical_devices('GPU')
+if gpus:
+  try:
+    for gpu in gpus:
+      tf.config.experimental.set_memory_growth(gpu, True)
+  except RuntimeError as e:
+    print(e)
+
+consumer = MessageConsumer([topics.TOPIC_SPOT], value_deserializer=lambda val: val.decode("UTF-8"),
+                           fetch_max_bytes=1024 * 1024 * 40, max_partition_fetch_bytes=1024 * 1024 * 50)
+producer = MessageProducer(value_serializer=lambda val: val.encode("UTF-8"), max_request_size=3173440261)
+model = ParkModel(ParkModel.from_file("cnr-weights3.h5"))
+OCCUPIED = 1
+FREE = 0
+for msg in consumer:
+    print("MODEL: Received update")
+
+    msg = SpotterMesssage.from_serialized(msg.value)
+
+    rects = [Rect.from_array(raw) for raw in msg.accepted_rects]
+
+    img = msg.image
+
+    counts = [0, 0]
+
+    for rect in rects:
+        crop_img = img[rect.top:rect.top + rect.height(), rect.left:rect.left + rect.width()]
+        res = model.predict([crop_img])
+        argmax = np.argmax(res[0])
+
+        counts[int(argmax)] += 1
+
+    msg = LotStatusMessage(msg.timestamp, msg.lot_id, counts[1], counts[0])
+    print("MODEL: Sending result")
+    print(msg.serialize())
+    producer.send(topics.TOPIC_STATUS, msg.serialize())
+
+
+

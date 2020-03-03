@@ -43,6 +43,11 @@ class Scene(object):
     def get_occupied_spots(self):
         return list(filter(lambda s: isinstance(s.state, AcceptedOccupiedState), self.spots))
 
+    def get_accepted_spots(self):
+        return list(filter(
+            lambda s: isinstance(s.state, AcceptedFreeState) or isinstance(s.state, AcceptedOccupiedState),
+            self.spots))
+
     def find_best_matching(self, rect: Rect) -> Spot:
         current_spot = None
         current_iou = 0

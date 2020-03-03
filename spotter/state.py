@@ -13,7 +13,7 @@ class PendingState(IState):
     TTL_DECAY = 1
     TTL_INC = 1
     START_TTL = 1
-    TTL_TO_ACCEPTED = 20 * 20
+    TTL_TO_ACCEPTED = 30
 
     def __init__(self):
         self.ttl = PendingState.START_TTL
