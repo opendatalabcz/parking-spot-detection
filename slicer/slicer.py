@@ -13,7 +13,8 @@ consumer = MessageConsumer([topics.TOPIC_SLICE], value_deserializer=lambda val: 
 producer = MessageProducer(value_serializer=lambda val: val.encode("UTF-8"), max_request_size=3173440261)
 stream = "realfhd.mp4"
 # stream = "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov"
-capture = cv2.VideoCapture(stream)
+# capture = cv2.VideoCapture(stream)
+capture = None
 
 
 def poll_message():
@@ -34,28 +35,29 @@ if __name__ == "__main__":
         # msg = poll_message()
         # value = get_message_value(msg)
         value = stream
-        counter = 0
 
         if value is not None and capture is None:
             stream = value
             capture = cv2.VideoCapture(stream)
-            value = None
-            fps = capture.get(cv2.CAP_PROP_FPS)
+            fps = int(capture.get(cv2.CAP_PROP_FPS))
             spf = 1 / fps
             counter = 0
+            print("FPS:  %d" % fps)
 
         if capture is not None:
             ret, frame = capture.read()
             counter += 1
             if not ret:
+                print(ret)
                 capture = None
                 continue
 
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             if counter % fps == 0:
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
                 msg = ImageMessage(topics.TOPIC_BACKEND, frame.shape, frame, str(frame.dtype), 1)
 
                 print("Slicer: sending message")
-
+                counter = 0
                 producer.send(topics.TOPIC_IMAGE, msg.serialize())
                 # producer.flush()

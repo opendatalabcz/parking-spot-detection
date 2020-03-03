@@ -29,7 +29,7 @@ class SceneManager:
                 [left, top, right, bottom],
                 outline=spot.get_draw_color())
             draw.text((left, top), "id: {}\ntime: {}".format(spot.id, spot.time), fill=spot.get_draw_color())
-        return image
+        return cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
 
     def visualize1(self, image, datas, spots, color="red", spots_color="green"):
         font = ImageFont.truetype(font='font/FiraMono-Medium.otf',

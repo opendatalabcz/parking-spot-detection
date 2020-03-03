@@ -34,3 +34,7 @@ if __name__ == "__main__":
         print(accepted_rects)
         producer.send(topics.TOPIC_SPOT, msg.serialize())
         producer.flush()
+
+        cv2.imshow("win", spotter.visualize(msg.image, spotter.scene))
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
