@@ -31,13 +31,15 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'corsheaders',
+    'kafka_consumer',
+    'lot_spotter',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'kafka_consumer.apps.KafkaConsumerConfig',
+
 ]
 
 MIDDLEWARE = [
