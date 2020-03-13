@@ -4,6 +4,7 @@ from django.utils import timezone
 import pickle
 from django.contrib.postgres.fields import JSONField
 
+
 class AutoDateTimeField(models.DateTimeField):
     def pre_save(self, model_instance, add):
         return timezone.now()
@@ -18,9 +19,9 @@ class SpotterModel(models.Model):
     id = models.AutoField(primary_key=True)
     timestamp = models.DateTimeField()
     image = models.BinaryField(default=pickle.dumps(None))
+    image_file = models.FileField(blank=False, null=False, upload_to="lot_images/", default="")
     rects = JSONField()
     lot_id = models.ForeignKey(LotModel, on_delete=models.CASCADE)
-
 
 
 class LotStateModel(models.Model):

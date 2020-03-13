@@ -1,5 +1,6 @@
 from django.urls import path
-
+from django.conf.urls.static import static
+from django.conf import settings
 from . import views
 urlpatterns = [
     path('', views.index, name='index'),
@@ -9,4 +10,3 @@ urlpatterns = [
     path('lot_rects/<int:id>/', views.lot_rects, name='lot_rects'),
     path('lot_image/<int:id>/', views.lot_image, name='lot_image'),
 ]
-

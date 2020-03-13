@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Dashboard from '../views/Dashboard.vue'
 import ParkingLots from "../views/ParkingLots";
+import ParkingLot from "../views/ParkingLot";
 
 Vue.use(VueRouter);
 
@@ -23,6 +24,11 @@ const routes = [
     path: '/lots',
     name: 'Parking Lots',
     component: ParkingLots
+  },
+  {
+    path: '/lot/:id',
+    name: 'Parking Lot Detail',
+    component: ParkingLot
   }
 ]
 

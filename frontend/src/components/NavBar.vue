@@ -7,7 +7,7 @@
                 collapse-on-scroll
         >
 
-            <v-app-bar-nav-icon slot="activator" class="black--text" @click="isLeftDrawerOpened = !isLeftDrawerOpened"/>
+            <v-app-bar-nav-icon class="black--text" @click="isLeftDrawerOpened = !isLeftDrawerOpened"/>
 
             <v-toolbar-title class="text-uppercase black--text">
                 <v-icon class="black--text" left>mdi-camera</v-icon>
@@ -18,7 +18,7 @@
 
             <v-toolbar-items>
                 <v-btn @click="isRightDrawerOpened = !isRightDrawerOpened" color="primary" rounded depressed>
-                    <v-icon class="black--text">mdi-settings</v-icon>
+                    <v-icon class="black--text">settings</v-icon>
                 </v-btn>
             </v-toolbar-items>
 
@@ -50,9 +50,21 @@
                 v-model="isRightDrawerOpened"
                 app
                 right
+                class="pa-5"
                 color="primary"
 
         >
+
+            <v-text-field
+                    v-model="timeToAccept"
+                    required
+                    color="black"
+                    class="black--text"
+                    type="number"
+                    label="Seconds to accept">
+                <v-icon slot="prepend" color="black" left>alarm</v-icon>
+
+            </v-text-field>
 
         </v-navigation-drawer>
     </nav>
@@ -64,6 +76,7 @@
 
         data: () => {
             return {
+                timeToAccept: 30,
                 isLeftDrawerOpened: false,
                 isRightDrawerOpened: false,
                 links: [
