@@ -37,24 +37,18 @@ class SlicerMessage(Serializable):
 
 class SpotterMesssage(Serializable):
 
-    def __init__(self, timestamp, lot_id, image, occupied_rects, free_rects, accepted_rects, detected_rects):
+    def __init__(self, timestamp, lot_id, image, rects):
         self.timestamp = timestamp
         self.lot_id = lot_id
         self.image = image
-        self.occupied_rects = occupied_rects
-        self.free_rects = free_rects
-        self.accepted_rects = accepted_rects
-        self.detected_rects = detected_rects
+        self.rects = rects
 
     def serialize(self):
         return json.dumps({
             "timestamp": self.timestamp,
             "lot_id": self.lot_id,
             "image": base64.b64encode(pickle.dumps(self.image)).decode("ascii"),
-            "occupied_rects": self.occupied_rects,
-            "free_rects": self.free_rects,
-            "accepted_rects": self.accepted_rects,
-            "detected_rects": self.detected_rects
+            "rects": self.rects
         })
 
     @staticmethod
@@ -62,7 +56,7 @@ class SpotterMesssage(Serializable):
         data = json.loads(serialized)
         decoded = base64.b64decode(data["image"])
         image = pickle.loads(decoded)
-        return SpotterMesssage(data["timestamp"], data["lot_id"], image, data["occupied_rects"], data["free_rects"], data["accepted_rects"], data["detected_rects"])
+        return SpotterMesssage(data["timestamp"], data["lot_id"], image, data["rects"])
 
 
 class DetectorMessage(Serializable):

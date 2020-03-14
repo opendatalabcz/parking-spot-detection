@@ -33,7 +33,9 @@ for msg in consumer:
 
     msg = SpotterMesssage.from_serialized(msg.value)
 
-    rects = [Rect.from_array(raw) for raw in msg.accepted_rects]
+    accepted_rects = list(filter(lambda x: x["state"] == "accepted", msg.rects))
+
+    rects = [Rect.from_array(raw["rect"]) for raw in accepted_rects]
 
     img = msg.image
 
