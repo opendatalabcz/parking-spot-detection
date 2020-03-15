@@ -40,7 +40,7 @@
             }
         },
         mounted() {
-            api.getLots((response) => this.lots = response)
+            api.getLots(false, (response) => this.lots = response)
         }
     }
 </script>

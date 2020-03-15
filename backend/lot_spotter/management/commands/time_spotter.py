@@ -59,7 +59,7 @@ class Command(BaseCommand):
                     "image_file": django_file,
                     "timestamp": make_aware(datetime.fromtimestamp(msg.timestamp))
                 })
-                # model.image_file.save('lot_image_%d.jpg' % msg.lot_id, django_file)
+                model.image_file.save('lot_image_%d.jpg' % msg.lot_id, django_file)
 
                 print("Updating Lot Rectangles")
 

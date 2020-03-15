@@ -5,14 +5,18 @@ class Api {
 
     LOT_DETAIL = this.BASE_URL+"lot/";
     LOT_RECTS = this.BASE_URL+"lot_rects/";
+    LOT_INFO = this.BASE_URL+"lot_info/";
 
 
     fetchImage = (url, cb) => axios.get(this.BASE_MEDIA_URL+url).then(r => cb(r.data));
     getLotDetail = (id, cb) => axios.get(this.LOT_DETAIL+id).then(r => cb(r.data));
-    getLots = (cb) => axios.get(this.LOT_DETAIL).then(r => cb(r.data));
-    getLotRects = (id, cb) => axios.get(this.LOT_RECTS+id).then( r => cb(r.data))
+    getLots = (info, cb) => axios.get(this.LOT_DETAIL+`?info=${info}`).then(r => cb(r.data));
+    getLotRects = (id, cb) => axios.get(this.LOT_RECTS+id).then( r => cb(r.data));
 
-    getImageUrl = url => this.BASE_MEDIA_URL+url
+    getImageUrl = url => this.BASE_MEDIA_URL+url;
+
+    getLotInfo = (id, cb) => axios.get(this.LOT_INFO+id).then(r => cb(r.data))
+
 }
 
 module.exports = new Api();

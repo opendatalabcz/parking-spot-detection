@@ -89,10 +89,9 @@
         mounted() {
             api.getLotDetail(this.lotId, (data) => this.lot = data);
             api.getLotRects(this.lotId, data => {
-                data.rects = JSON.parse(data.rects);
                 data.image_url = api.getImageUrl(data.image_url);
                 this.rects = data;
-                this.rectangles = this.rects.rects
+                this.rectangles = this.rects.rects.map(r => r.rect)
             });
         },
         methods: {

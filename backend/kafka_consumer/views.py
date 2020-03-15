@@ -14,9 +14,16 @@ def index(req):
 
 
 def lot_list(req):
-    obj = list(map(lambda x: model_to_dict(x), LotModel.objects.all()))
 
-    return JsonResponse(obj, safe=False)
+    lots = list(map(lambda x: model_to_dict(x), LotModel.objects.all()))
+
+    if req.GET.get('info', False):
+        for lot in lots:
+            lot["info"] = list(map(lambda x: model_to_dict(x), LotStateModel.objects.filter(lot_id_id=lot["id"])))
+
+    print(lots)
+
+    return JsonResponse(lots, safe=False)
 
 
 def lot_detail(req, id):
