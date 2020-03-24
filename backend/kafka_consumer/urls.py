@@ -9,4 +9,5 @@ urlpatterns = [
     path('lot_info/<int:id>/', views.lot_info, name='lot_info'),
     path('lot_rects/<int:id>/', views.lot_rects, name='lot_rects'),
     path('lot_image/<int:id>/', views.lot_image, name='lot_image'),
+    path('lot_statistic/<int:id>/', views.lot_statistic, name='lot_statistic')
 ]

@@ -49,3 +49,14 @@ def lot_image(req, id):
     lot_rects = SpotterModel.objects.get(lot_id=id)
     b64_image = base64.b64encode(lot_rects.image).decode("ascii")
     return HttpResponse("data:image/jpeg;base64," + b64_image)
+
+def lot_statistic(req, id):
+    lot = LotModel.objects.get(id=id)
+
+    lot_info = LotStateModel.objects.filter(lot_id=lot).order_by('-timestamp')
+
+    most_recent_rects = lot_info.first()
+
+    most_recent_rects = lot_info[0]["rects"]
+
+

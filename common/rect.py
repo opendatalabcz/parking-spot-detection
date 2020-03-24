@@ -39,9 +39,6 @@ class Rect(object):
         if not self.intersect(other):
             return 0.0
 
-        if self.is_inside(other) or other.is_inside(self):
-            return 1
-
         points = [
             max(self.left, other.left),
             max(self.top, other.top),

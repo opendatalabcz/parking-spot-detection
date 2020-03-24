@@ -34,25 +34,16 @@
                 </v-layer>
 
                 <v-layer ref="rectsLayer">
-                    <v-rect v-for="[rect, i] in rectangles.map((x,i) => [x,i])" :id="i" :config="{
+                    <v-rect v-for="[{rect, state, ttl}, i] in rectangles.map((x,i) => [x,i])" :id="i" :config="{
                         x: rect[0],
                         y: rect[1],
                         width: rect[2] - rect[0],
                         height: rect[3] - rect[1],
-                        stroke: 'green',
+                        stroke: rectColors[state],
                         draggable:true,
                         strokeScaleEnabled: false
                     }" :key="i" @click="transformRectangle" />
 
-                    <v-rect v-for="[rect, i] in blockers.map((x,i) => [x,i])" :config="{
-                        x: rect[0],
-                        y: rect[1],
-                        width: rect[2] - rect[0],
-                        height: rect[3] - rect[1],
-                        stroke: 'red',
-                        draggable:true,
-                        strokeScaleEnabled: false
-                    }" :key="i" @click="transformRectangle"/>
 
 
                 </v-layer>
@@ -82,7 +73,12 @@
                 image: null,
                 rectangles: [],
                 blockers: [],
-                rectangleSelected: null
+                rectangleSelected: null,
+                rectColors: {
+                    "pending": "yellow",
+                    "blocker": "red",
+                    "accepted": "green"
+                }
 
             }
         },
@@ -91,7 +87,7 @@
             api.getLotRects(this.lotId, data => {
                 data.image_url = api.getImageUrl(data.image_url);
                 this.rects = data;
-                this.rectangles = this.rects.rects.map(r => r.rect)
+                this.rectangles = this.rects.rects
             });
         },
         methods: {

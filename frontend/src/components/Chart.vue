@@ -1,16 +1,18 @@
 <script>
-    import {Bar, mixins} from 'vue-chartjs';
+    import {Line, mixins} from 'vue-chartjs';
 
     const {reactiveProp} = mixins;
 
     export default {
-        extends: Bar,
+        extends: Line,
         mixins: [reactiveProp],
         mounted() {
 
             this.renderChart(this.chartData, this.options || {
                 responsive: true,
-                maintainAspectRatio: false
+                maintainAspectRatio: false,
+                responsiveAnimationDuration: 500,
+
             });
 
         }

@@ -37,18 +37,18 @@ class SlicerMessage(Serializable):
 
 class SpotterMesssage(Serializable):
 
-    def __init__(self, timestamp, lot_id, image, rects):
+    def __init__(self, lot_id, image, spots, timestamp):
         self.timestamp = timestamp
         self.lot_id = lot_id
         self.image = image
-        self.rects = rects
+        self.spots = spots  # { id: [1,2,3,4], ... }
 
     def serialize(self):
         return json.dumps({
-            "timestamp": self.timestamp,
             "lot_id": self.lot_id,
             "image": base64.b64encode(pickle.dumps(self.image)).decode("ascii"),
-            "rects": self.rects
+            "spots": self.spots,
+            "timestamp": self.timestamp
         })
 
     @staticmethod
@@ -56,7 +56,7 @@ class SpotterMesssage(Serializable):
         data = json.loads(serialized)
         decoded = base64.b64decode(data["image"])
         image = pickle.loads(decoded)
-        return SpotterMesssage(data["timestamp"], data["lot_id"], image, data["rects"])
+        return SpotterMesssage(data["lot_id"], image, data["spots"], data["timestamp"])
 
 
 class DetectorMessage(Serializable):
@@ -114,21 +114,23 @@ class ImageMessage(Serializable):
 
 class LotStatusMessage(Serializable):
 
-    def __init__(self, timestamp, lot_id, occupied, free):
+    def __init__(self, timestamp, lot_id, occupied, free, spots):
         self.timestamp = timestamp
         self.lot_id = lot_id
         self.occupied = occupied
         self.free = free
+        self.spots = spots
 
     def serialize(self):
         return json.dumps({
             "timestamp": self.timestamp,
             "lot_id": self.lot_id,
             "occupied": self.occupied,
-            "free": self.free
+            "free": self.free,
+            "spots": self.spots
         })
 
     @staticmethod
     def from_serialized(serialized):
         data = json.loads(serialized)
-        return LotStatusMessage(data["timestamp"], data["lot_id"], data["occupied"], data["free"])
+        return LotStatusMessage(data["timestamp"], data["lot_id"], data["occupied"], data["free"], data["spots"])

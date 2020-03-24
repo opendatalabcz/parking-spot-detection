@@ -1,8 +1,8 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import LotStateModel, LotModel, SpotterModel
+from .models import ParkingSpotModel, LotModel, SpotHistoryModel
 
 admin.site.register(LotModel)
-admin.site.register(LotStateModel)
-admin.site.register(SpotterModel)
+admin.site.register(ParkingSpotModel)
+admin.site.register(SpotHistoryModel)
