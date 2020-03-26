@@ -7,6 +7,7 @@ from common.states import PENDING
 from datetime import *
 from common.states import UNKNOWN
 
+
 class AutoDateTimeField(models.DateTimeField):
     def pre_save(self, model_instance, add):
         return timezone.now()
@@ -25,22 +26,21 @@ class ParkingSpotModel(models.Model):
     status = models.IntegerField(default=PENDING)
     ttl = models.FloatField(default=0.0)
 
+
 class SpotHistoryModel(models.Model):
     id = models.AutoField(primary_key=True)
-    spot = models.ForeignKey(ParkingSpotModel, on_delete=models.CASCADE)
+    spot = models.ForeignKey(ParkingSpotModel, on_delete=models.CASCADE, related_name='history')
     timestamp = models.DateTimeField(auto_now_add=True, blank=True)
     occupancy = models.IntegerField(default=UNKNOWN)
 
+
 class LotHistoryModel(models.Model):
     id = models.AutoField(primary_key=True)
-    lot = models.ForeignKey(LotModel, on_delete=models.CASCADE)
+    lot = models.ForeignKey(LotModel, on_delete=models.CASCADE, related_name='history')
     num_vacant = models.IntegerField(default=0)
     num_occupied = models.IntegerField(default=0)
     num_unknown = models.IntegerField(default=0)
     timestamp = models.DateTimeField(auto_now_add=True, blank=True)
-
-
-
 
 
 class SpotterModel(models.Model):

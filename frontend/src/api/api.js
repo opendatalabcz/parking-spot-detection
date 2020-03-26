@@ -4,18 +4,16 @@ class Api {
     BASE_MEDIA_URL = "http://localhost:8000/media/";
 
     LOT_DETAIL = this.BASE_URL+"lot/";
-    LOT_RECTS = this.BASE_URL+"lot_rects/";
-    LOT_INFO = this.BASE_URL+"lot_info/";
+    getLotSpotsUrl = (lotId) => this.BASE_URL+`lot/${lotId}/spot/`;
 
 
-    fetchImage = (url, cb) => axios.get(this.BASE_MEDIA_URL+url).then(r => cb(r.data));
-    getLotDetail = (id, cb) => axios.get(this.LOT_DETAIL+id).then(r => cb(r.data));
-    getLots = (info, cb) => axios.get(this.LOT_DETAIL+`?info=${info}`).then(r => cb(r.data));
-    getLotRects = (id, cb) => axios.get(this.LOT_RECTS+id).then( r => cb(r.data));
+    fetchImage = (url) => axios.get(this.BASE_MEDIA_URL+url);
+    getLotDetail = (id) => axios.get(this.LOT_DETAIL+id);
+    getLots = () => axios.get(this.LOT_DETAIL);
+    getLotSpots = (lotId) => axios.get(this.getLotSpotsUrl(lotId));
 
     getImageUrl = url => this.BASE_MEDIA_URL+url;
 
-    getLotInfo = (id, cb) => axios.get(this.LOT_INFO+id).then(r => cb(r.data))
 
 }
 

@@ -3,12 +3,6 @@
     <div>
         <h1>{{ lot.name }}</h1>
 
-        <v-progress-circular
-                indeterminate
-                color="primary"
-                v-if="this.rects == {}"
-        ></v-progress-circular>
-
 
         <v-container class="mx-0 px-0">
 
@@ -22,33 +16,29 @@
                 <span>Add Blocker</span>
             </v-btn>
 
-            <v-btn @click="removeRectangle" v-if="rectangleSelected !== null" color="error" class="text--black">
+            <v-btn @click="removeRectangle"  color="error" class="text--black">
                 <v-icon left>mdi-delete</v-icon>
                 <span>Delete</span>
             </v-btn>
+            <fabric-canvas ref="canvas" :height="canvasHeight" :width="canvasWidth">
+                <fabric-Rectangle ref="canvasSpots" v-for="spot in spots" :key="spot.id"
+                                  :id="'rightFoot'"
+                                  :borderColor="'#00ff00'"
+                                  :hasBorder="true"
+                                  :left.sync="spot.coordinates[0]"
+                                  :top.sync="spot.coordinates[1]"
+                                  :width.sync="spot.width"
+                                  :height.sync="spot.height"
+                                  :strokeDashArray="[0,0]"
+                                  :stroke="'green'"
+                                  :fill="'#00000000'"
+                                  :strokeWidth="2"
+                                  :borderScaleFactor="0"
+                                  :originX="'left'"
+                                  :originY="'top'"
+                ></fabric-Rectangle>
 
-            <v-stage ref="stage" :config="stageSize" @click="imageClick">
-
-                <v-layer>
-                    <v-image ref="image" :config="{image:image}"/>
-                </v-layer>
-
-                <v-layer ref="rectsLayer">
-                    <v-rect v-for="[{rect, state, ttl}, i] in rectangles.map((x,i) => [x,i])" :id="i" :config="{
-                        x: rect[0],
-                        y: rect[1],
-                        width: rect[2] - rect[0],
-                        height: rect[3] - rect[1],
-                        stroke: rectColors[state],
-                        draggable:true,
-                        strokeScaleEnabled: false
-                    }" :key="i" @click="transformRectangle" />
-
-
-
-                </v-layer>
-            </v-stage>
-
+            </fabric-canvas>
 
         </v-container>
 
@@ -57,89 +47,69 @@
 </template>
 
 <script>
+    import vueFabricWrapper from "vue-fabric-wrapper";
+
     const api = require('../api/api');
     export default {
         name: "ParkingLot",
+        components: {
+            FabricCanvas: vueFabricWrapper.FabricCanvas,
+            FabricRectangle: vueFabricWrapper.FabricRectangle
+        },
         data() {
             return {
                 lot: {},
-                rects: {},
+                spots: [],
                 lotId: this.$route.params.id,
-                stageSize: {
-                    width: 500,
-                    height: 500
+                canvas: null,
+                canvasWidth: 500,
+                canvasHeight: 500,
+                spotColors: {
+                    "-1": "yellow",
+                    "0": "red",
+                    "1": "green"
                 },
-                isDragging: false,
-                image: null,
-                rectangles: [],
-                blockers: [],
-                rectangleSelected: null,
-                rectColors: {
-                    "pending": "yellow",
-                    "blocker": "red",
-                    "accepted": "green"
-                }
+                rightFootPosLeft: 300,
+                rightFootPosTop: 350
 
             }
         },
         mounted() {
-            api.getLotDetail(this.lotId, (data) => this.lot = data);
-            api.getLotRects(this.lotId, data => {
-                data.image_url = api.getImageUrl(data.image_url);
-                this.rects = data;
-                this.rectangles = this.rects.rects
+            api.getLotDetail(this.lotId).then(response => this.lot = response.data);
+            api.getLotSpots(this.lotId).then(response => {
+                for (let spot of response.data) {
+                    spot.width = spot.coordinates[2] - spot.coordinates[0];
+                    spot.height = spot.coordinates[3] - spot.coordinates[1];
+                }
+                this.spots = response.data;
             });
+            this.canvas = this.$refs.canvas.canvas;
+
+            this.canvas.setBackgroundImage("http://localhost:8000/media/snapshot.jpg", (image) => {
+                this.canvasWidth = image.width;
+                this.canvasHeight = image.height;
+            })
         },
         methods: {
-
             addParkSpace() {
-                this.rectangles.push([this.image.width / 2, this.image.height / 2, this.image.width / 2 + 100, this.image.height / 2 + 50])
+                this.spots.push({"coordinates": [50, 50, 50, 50], "status": 1})
             },
             addBlocker() {
-                this.blockers.push([this.image.width / 2, this.image.height / 2, this.image.width / 2 + 100, this.image.height / 2 + 50])
+                this.spots.push({"coordinates": [50, 50, 50, 50], "status": 0})
             },
             removeRectangle() {
-                this.rectangleSelected.destroy();
-                this.removeCurrentTransformer()
-            },
-            removeCurrentTransformer() {
-                const layer = this.$refs.stage.getStage();
-                layer.find('Transformer').destroy();
-                layer.draw();
-                this.rectangleSelected = null;
-            },
-            imageClick(e) {
-                if (e.target === this.$refs.image._konvaNode) {
-                    this.removeCurrentTransformer()
-                }
-            },
-
-            transformRectangle(e) {
-                const layer = this.$refs.rectsLayer.getStage();
-                layer.find('Transformer').destroy();
-                const transformer = new window.Konva.Transformer({
-                    rotateEnabled: false,
-                    ignoreStroke: true
-                });
-                transformer.attachTo(e.target);
-                layer.add(transformer);
-                layer.draw();
-                this.rectangleSelected = e.target;
+                this.canvas.remove(this.canvas.getActiveObject())
             }
         },
         watch: {
-            rects() {
-                const image = new window.Image();
-                image.src = this.rects.image_url;
-                image.onload = () => {
-                    this.image = image;
-                    this.stageSize.width = image.width;
-                    this.stageSize.height = image.height;
-                };
-            }
+            // spots: {
+            //     handler: function () {
+            //         // console.log(newspots[0].coordinates+", "+newspots[0].width+", "+newspots[0].height)
+            //         console.log(this.$refs.canvasSpots[0].rect.aCoords)
+            //     },
+            //     deep:true
+            // }
         }
-
-
     }
 </script>
 
