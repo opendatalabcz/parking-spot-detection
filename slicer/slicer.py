@@ -26,6 +26,7 @@ def get_message_value(msg):
         return list(msg.values())[0][0].value.decode("UTF-8")
     return None
 
+os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;udp"
 
 counter = 0
 fps = 1
@@ -38,7 +39,7 @@ if __name__ == "__main__":
 
         if value is not None and capture is None:
             stream = value
-            capture = cv2.VideoCapture(stream)
+            capture = cv2.VideoCapture(stream, cv2.CAP_FFMPEG)
             fps = int(capture.get(cv2.CAP_PROP_FPS))
             spf = 1 / fps
             counter = 0
@@ -56,7 +57,6 @@ if __name__ == "__main__":
 
                 frame = cv2.GaussianBlur(frame, (1, 1), cv2.BORDER_DEFAULT)
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
 
                 msg = ImageMessage(topics.TOPIC_BACKEND, frame.shape, frame, str(frame.dtype), 1)
 
