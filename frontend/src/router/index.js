@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import Dashboard from '../views/Dashboard.vue'
 import ParkingLots from "../views/ParkingLots";
 import ParkingLot from "../views/ParkingLot";
+import NewLot from "../views/NewLot";
 
 Vue.use(VueRouter);
 
@@ -13,12 +14,9 @@ const routes = [
     component: Dashboard
   },
   {
-    path: '/about',
-    name: 'About',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
+    path: '/addLot',
+    name: 'Add Lot',
+    component: NewLot
   },
   {
     path: '/lots',

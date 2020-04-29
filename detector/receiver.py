@@ -8,6 +8,7 @@ from common.messages import ImageMessage, DetectorMessage
 from common.producers import MessageProducer
 from datetime import datetime
 import tensorflow as tf
+from common.common_utils import timed
 
 gpus = tf.config.experimental.list_physical_devices('GPU')
 if gpus:
@@ -28,11 +29,15 @@ car_detector = MaskCarDetector(mask.model)
 consumer = MessageConsumer([topics.TOPIC_IMAGE], value_deserializer=lambda val: val.decode("UTF-8"), fetch_max_bytes=1024*1024*40, max_partition_fetch_bytes=1024*1024*50)
 producer = MessageProducer(value_serializer=lambda val: val.encode("UTF-8"), max_request_size=3173440261)
 
-for msg in consumer:
+@timed
+def handle_image_message(msg):
     image_msg = ImageMessage.from_serialized(msg.value)
 
     r, rects = car_detector.detect_cars(image_msg.image)
 
-    detector_msg = DetectorMessage(datetime.now().timestamp(), image_msg.lot_id, [rect.to_native_array() for rect in rects], image_msg.image)
+    detector_msg = DetectorMessage(datetime.now().timestamp(), image_msg.lot_id,
+                                   [rect.to_native_array() for rect in rects], image_msg.image)
     producer.send(topics.TOPIC_DETECT, detector_msg.serialize())
-    print(rects)
+
+for msg in consumer:
+    handle_image_message(msg)

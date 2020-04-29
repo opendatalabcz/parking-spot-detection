@@ -16,7 +16,7 @@ class AutoDateTimeField(models.DateTimeField):
 class LotModel(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.TextField(null=False, max_length=200)
-
+    video_src = models.TextField(null=True, blank=True, max_length=2000)
 
 class ParkingSpotModel(models.Model):
     id = models.AutoField(primary_key=True)
@@ -41,24 +41,6 @@ class LotHistoryModel(models.Model):
     num_occupied = models.IntegerField(default=0)
     num_unknown = models.IntegerField(default=0)
     timestamp = models.DateTimeField(auto_now_add=True, blank=True)
-
-
-class SpotterModel(models.Model):
-    id = models.AutoField(primary_key=True)
-    timestamp = models.DateTimeField()
-    image = models.BinaryField(default=pickle.dumps(None))
-    image_file = models.FileField(blank=False, null=False, upload_to="lot_images/", default="")
-    rects = JSONField()
-    lot_id = models.ForeignKey(LotModel, on_delete=models.CASCADE)
-
-
-class LotStateModel(models.Model):
-    id = models.AutoField(primary_key=True)
-    full_spots = models.IntegerField()
-    available_spots = models.IntegerField()
-    timestamp = models.DateTimeField()
-    rects = JSONField()
-    lot_id = models.ForeignKey(LotModel, on_delete=models.CASCADE)
 
 
 class SettingsModel(models.Model):

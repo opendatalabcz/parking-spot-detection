@@ -11,7 +11,7 @@ from common import topics
 
 consumer = MessageConsumer([topics.TOPIC_SLICE], value_deserializer=lambda val: val.decode("UTF-8"))
 producer = MessageProducer(value_serializer=lambda val: val.encode("UTF-8"), max_request_size=3173440261)
-stream = "movie2.mp4"
+stream = "realhd.mp4"
 # stream = "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov"
 capture = cv2.VideoCapture(stream)
 capture = None
@@ -55,10 +55,11 @@ if __name__ == "__main__":
 
             if counter % fps == 0:
 
-                frame = cv2.GaussianBlur(frame, (1, 1), cv2.BORDER_DEFAULT)
+                # cv2.imwrite("snapshot2.jpg", frame)
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                frame = cv2.GaussianBlur(frame, (1, 1), cv2.BORDER_DEFAULT)
 
-                msg = ImageMessage(topics.TOPIC_BACKEND, frame.shape, frame, str(frame.dtype), 1)
+                msg = ImageMessage(topics.TOPIC_BACKEND, frame.shape, frame, str(frame.dtype), 3)
 
                 print("Slicer: sending message")
                 counter = 0

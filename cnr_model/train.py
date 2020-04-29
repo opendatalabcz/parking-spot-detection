@@ -13,32 +13,10 @@ from random import shuffle
 from keras import optimizers
 from keras.callbacks import TensorBoard
 from keras.utils import Sequence
-
-
-def create_model(input_shape, num_classes) -> Sequential:
-    model = Sequential()
-    model.add(Conv2D(16, (11, 11), input_shape=input_shape, strides=(4, 4), padding='same'))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2)))
-
-    model.add(Conv2D(20, (5, 5), strides=(1, 1), padding='same'))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2)))
-
-    model.add(Conv2D(30, (3, 3), strides=(1, 1), padding='same'))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2)))
-
-    model.add(Flatten())
-    model.add(Dense(48, activation='relu'))
-
-    model.add(Dense(num_classes, activation='softmax'))
-
-    sgd = optimizers.SGD(lr=0.01, decay=5e-4, momentum=0.9, nesterov=True)
-
-    model.compile(optimizer=sgd, loss='binary_crossentropy', metrics=['accuracy'])
-    return model
-
+from keras.applications.resnet50 import ResNet50
+from keras.applications.vgg16 import VGG16
+from keras.preprocessing.image import ImageDataGenerator
+from classifiers import CustomAlex1, CVGG16, CResNet50, CVGG19, CInceptionV3
 
 def load_images(paths):
     imgs = []
@@ -47,7 +25,7 @@ def load_images(paths):
     return imgs
 
 
-def load_labels(file, img_root):
+def load_cnr_labels(file, img_root):
     with open(file, "r") as f:
         lines = f.readlines()
     lines = [line.strip() for line in lines]
@@ -56,7 +34,7 @@ def load_labels(file, img_root):
         yield os.path.join(img_root, split[0]), split[1]
 
 
-def load_pk_images(path):
+def load_pk_labels(path):
     for path, subdirs, files in os.walk(path):
 
         for name in files:
@@ -72,11 +50,9 @@ LABELS_DIR = "data/LABELS"
 PK_IMG_DIR = "pklot\\"
 
 # labels = list(load_labels(os.path.join(LABELS_DIR, "all.txt"), IMG_DIR))
-labels = list(load_labels(os.path.join(LABELS_DIR, "all.txt"), IMG_DIR))
-shuffle(labels)
 
-logdir = "logs/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-tensorboard = TensorBoard(log_dir=logdir)
+
+
 
 
 class Generator(Sequence):
@@ -86,7 +62,7 @@ class Generator(Sequence):
         self.batch_size = batch_size
 
     def __getitem__(self, index):
-        curr_labels = labels[index * self.batch_size: (index + 1) * self.batch_size]
+        curr_labels = self.labels[index * self.batch_size: (index + 1) * self.batch_size]
         x_train = np.array(load_images(path for path, _ in curr_labels))
         curr_labels = np.array([label for _, label in curr_labels])
         y_train = np_utils.to_categorical(curr_labels, 2)
@@ -95,21 +71,35 @@ class Generator(Sequence):
     def __len__(self):
         return int(len(self.labels) / self.batch_size)
 
+MODEL_NAME = "cnr-weights-vgg16.h5"
 
-MODEL_NAME = "cnr-weights15.h5"
 
 try:
     model = keras.models.load_model(MODEL_NAME)
 except:
-    model = create_model((W, H, 3), 2)
+    factory = CVGG16()
+    model = factory.build()
+
+
+logdir = "logs/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + "-CVGG19"
+tensorboard = TensorBoard(log_dir=logdir)
+
+
+
+# model = ResNet50(input_shape=(W,H,3),classes=2, weights=None)
+# model = VGG16(input_shape=(W,H,3),classes=2, weights=None)
 
 BATCH_SIZE = 64
-# labels = list(load_pk_images(PK_IMG_DIR))
-half = int(len(labels) / 2)
-print(f"half:{half}")
-train_gen = Generator(labels[half:], BATCH_SIZE)
-val_gen = Generator(labels[:half], BATCH_SIZE)
-model.fit_generator(train_gen, validation_data=val_gen, epochs=2, callbacks=[tensorboard], workers=6, shuffle=True)
+pk_labels = list(load_pk_labels(PK_IMG_DIR)) # PKLot dataset
+cnr_labels = list(load_cnr_labels(os.path.join(LABELS_DIR, "all.txt"), IMG_DIR)) #CNR dataset
+
+
+
+# half = int(len(labels) / 2)
+# print(f"half:{half}")
+train_gen = Generator(cnr_labels, BATCH_SIZE)
+val_gen = Generator(pk_labels, BATCH_SIZE)
+model.fit_generator(train_gen, validation_data=val_gen, epochs=3, callbacks=[tensorboard], workers=6, shuffle=True)
 
 model.save_weights(MODEL_NAME)
 model.save(MODEL_NAME)

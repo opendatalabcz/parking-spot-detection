@@ -48,12 +48,12 @@ def handle_detect_message(message):
         pass
 
 
-LAST_CLASSIFICATION = None
+LAST_CLASSIFICATION : datetime = None
 
 
 def handle_image_message(message):
     global LAST_CLASSIFICATION
-    if not LAST_CLASSIFICATION or LAST_CLASSIFICATION - datetime.now() >= timedelta(minutes=5):
+    if not LAST_CLASSIFICATION or datetime.now() - LAST_CLASSIFICATION >= timedelta(seconds=20):
         msg = ImageMessage.from_serialized(message.value)
         lot = LotModel.objects.get(id=msg.lot_id)
         spots = list(ParkingSpotModel.objects.filter(lot=lot, status=ACCEPTED).values('id', 'coordinates'))
@@ -66,7 +66,7 @@ def handle_image_message(message):
 
 def handle_status_message(message):
     msg = LotStatusMessage.from_serialized(message.value)
-    print(msg.spots)
+    print(msg.free)
     for key in msg.spots:
         id = int(key)
         spot_history = SpotHistoryModel(spot_id=id, timestamp=msg.timestamp, occupancy=msg.spots[key]['occupancy'])

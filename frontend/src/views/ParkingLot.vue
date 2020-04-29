@@ -1,34 +1,46 @@
 <template>
 
     <div>
-            <v-progress-linear
-      indeterminate
-      color="yellow darken-2"
-      v-if="loading"
-    ></v-progress-linear>
+        <v-progress-linear
+                indeterminate
+                color="yellow darken-2"
+                v-if="loading"
+        ></v-progress-linear>
         <h1>{{ lot.name }}</h1>
 
 
         <v-container class="mx-0 px-0">
+            <v-row justify="center">
 
-            <v-btn @click="addParkSpace" color="success" class="text--black">
-                <v-icon left>mdi-plus</v-icon>
-                <span>Add Parking Space</span>
-            </v-btn>
+                <v-col cols="12">
+                    <v-btn  @click="addParkSpace" color="success" class="text--black ma-2">
+                        <v-icon left>mdi-plus</v-icon>
+                        <span>Add Parking Space</span>
+                    </v-btn>
 
-            <v-btn @click="addBlocker" color="error" class="text--black">
-                <v-icon left>mdi-plus</v-icon>
-                <span>Add Blocker</span>
-            </v-btn>
+                    <v-btn @click="addBlocker" color="error" class="text--black">
+                        <v-icon left>mdi-plus</v-icon>
+                        <span>Add Blocker</span>
+                    </v-btn>
 
-            <v-btn @click="removeRectangle" color="error" class="text--black">
-                <v-icon left>mdi-delete</v-icon>
-                <span>Delete</span>
-            </v-btn>
-            <v-btn @click="saveChanges" color="success" class="text--black">
-                <v-icon left>save</v-icon>
-                <span>Save Changes</span>
-            </v-btn>
+
+                    <v-btn @click="saveChanges" color="success" class="text--black ma-2">
+                        <v-icon left>save</v-icon>
+                        <span>Save Changes</span>
+                    </v-btn>
+                    <v-spacer/>
+
+                    <v-btn :disabled="!selectedRectangle" @click="removeRectangle" color="error" class="text--black ma-2">
+                        <v-icon left>mdi-delete</v-icon>
+                        <span>Delete</span>
+                    </v-btn>
+
+                    <v-btn :disabled="!selectedRectangle" @click="isDetailOpened = true" color="success" class="text--black">
+                        <v-icon left>info</v-icon>
+                        <span>Show Detail</span>
+                    </v-btn>
+                </v-col>
+            </v-row>
 
 
             <v-row :columns="12">
@@ -46,6 +58,7 @@
                                           :strokeDashArray="[0,0]"
                                           :stroke="spotColors[spot.status.toString()]"
                                           :fill="'#00000000'"
+                                          @mousedown="onRectangleClick"
                                           :strokeWidth="2"
                                           :borderScaleFactor="0"
                                           :originX="'left'"
@@ -58,6 +71,40 @@
 
         </v-container>
 
+        <v-dialog v-model="isDetailOpened" fullscreen  transition="dialog-bottom-transition">
+            <v-card>
+                <v-toolbar color="primary">
+                    <v-btn icon @click="isDetailOpened = false">
+                        <v-icon>mdi-close</v-icon>
+                    </v-btn>
+                    <v-spacer></v-spacer>
+                </v-toolbar>
+
+                <v-card-title>
+                    <h2>Parking Spot ID: {{ selectedRectangle }}</h2>
+
+                </v-card-title>
+
+                <v-card-text style="display:block;">
+                <h3>History of this spot in time:</h3>
+                <Chart style="height:400px;"
+                       v-if="selectedRectangleHistory && selectedRectangleHistory.labels.length"
+                       :chart-data="selectedRectangleHistory"
+
+                       :styles="{
+
+                                                position: 'relative',
+                                                maintainAspectRatio: false,
+                                                responsive: true
+                                                }"
+                />
+                <p v-if="!selectedRectangleHistory || !selectedRectangleHistory.labels.length">No data has been found for this spot.</p>
+                    </v-card-text>
+
+
+            </v-card>
+
+        </v-dialog>
 
     </div>
 </template>
@@ -66,15 +113,18 @@
     import vueFabricWrapper from "vue-fabric-wrapper";
 
     const api = require('../api/api');
+    import Chart from "../components/Chart";
+
     export default {
         name: "ParkingLot",
         components: {
+            Chart,
             FabricCanvas: vueFabricWrapper.FabricCanvas,
             FabricRectangle: vueFabricWrapper.FabricRectangle
         },
         data() {
             return {
-                seedId:0,
+                seedId: 0,
                 loading: false,
                 lot: {},
                 spots: [],
@@ -88,7 +138,10 @@
                     "1": "green"
                 },
                 rightFootPosLeft: 300,
-                rightFootPosTop: 350
+                rightFootPosTop: 350,
+                selectedRectangleHistory: null,
+                selectedRectangle: null,
+                isDetailOpened: false,
 
             }
         },
@@ -99,18 +152,22 @@
                 this.spots = response.data;
             });
 
-            this.canvas.setBackgroundImage("http://localhost:8000/media/snapshot.jpg", (image) => {
+            this.canvas.setBackgroundImage(`http://localhost:8000/media/snapshot${this.lotId}.jpg`, (image) => {
                 this.canvasWidth = image.width;
                 this.canvasHeight = image.height;
-            })
+            });
+
+            this.canvas.on("mouse:down", (e) => {
+                this.onCanvasClick(e)
+            });
         },
         methods: {
             addParkSpace() {
-                this.spots.push({id:"spot"+this.seedId, "coordinates": [50, 50, 100,100], "status": 1});
+                this.spots.push({id: "spot" + this.seedId, "coordinates": [50, 50, 100, 100], "status": 1});
                 this.seedId++;
             },
             addBlocker() {
-                this.spots.push({id:"blocker"+this.seedId, coordinates: [50, 50, 100, 100], "status": 0});
+                this.spots.push({id: "blocker" + this.seedId, coordinates: [50, 50, 100, 100], "status": 0});
                 this.seedIt++;
             },
             removeRectangle() {
@@ -122,7 +179,7 @@
                 console.log(this.canvas.getObjects());
 
                 const results = [];
-                this.canvas.getObjects().forEach (o => {
+                this.canvas.getObjects().forEach(o => {
                     const c = o.oCoords;
                     const coords = [c.tl.x, c.tl.y, c.br.x, c.br.y].map(x => parseInt(x));
 
@@ -130,24 +187,48 @@
                         let spot = spotsCopy.find(spot => spot.id === o.id);
                         spot.coordinates = coords;
                         results.push(spot)
-                    }
-                    else {
-                        results.push({id:-1, coordinates: coords, status: o.id.includes("spot") ? 1 : 0})
+                    } else {
+                        results.push({id: -1, coordinates: coords, status: o.id.includes("spot") ? 1 : 0})
                     }
 
                 });
 
                 console.log(results);
-                api.uploadSpots(this.lotId, results).then( response => {
+                api.uploadSpots(this.lotId, results).then(response => {
                     this.spots = response.data;
                     this.loading = false;
                 })
 
+            },
+            async onRectangleClick(e) {
+                this.selectedRectangle = e.id;
+                const data = (await api.getSpotHistory(this.lotId, e.id)).data;
+                this.selectedRectangleHistory = this.getChartDataFor(data);
+                console.log(this.selectedRectangleHistory);
+            },
+            getChartDataFor(history) {
+                history.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+                return {
+                    labels: history.map(h => new Date(h.timestamp).toLocaleString()),
+                    datasets: [
+                        {
+                            label: 'Occupancy Status',
+                            borderColor: 'orange',
+                            data: history.map(h => h.occupancy)
+                        }
+                    ]
+                }
+            },
+            onCanvasClick(e) {
+                console.log(e);
+                if (!e.target) {
+                    this.selectedRectangleHistory = null;
+                    this.selectedRectangle = null;
+                }
             }
         }
     }
 </script>
 
 <style scoped>
-
 </style>

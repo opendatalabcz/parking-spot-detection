@@ -16,11 +16,11 @@
 
             <v-spacer></v-spacer>
 
-            <v-toolbar-items>
-                <v-btn @click="isRightDrawerOpened = !isRightDrawerOpened" color="primary" rounded depressed>
-                    <v-icon class="black--text">settings</v-icon>
-                </v-btn>
-            </v-toolbar-items>
+<!--            <v-toolbar-items>-->
+<!--                <v-btn @click="isRightDrawerOpened = !isRightDrawerOpened" color="primary" rounded depressed>-->
+<!--                    <v-icon class="black&#45;&#45;text">settings</v-icon>-->
+<!--                </v-btn>-->
+<!--            </v-toolbar-items>-->
 
         </v-app-bar>
 
@@ -46,27 +46,27 @@
 
         </v-navigation-drawer>
 
-        <v-navigation-drawer
-                v-model="isRightDrawerOpened"
-                app
-                right
-                class="pa-5"
-                color="primary"
+<!--        <v-navigation-drawer-->
+<!--                v-model="isRightDrawerOpened"-->
+<!--                app-->
+<!--                right-->
+<!--                class="pa-5"-->
+<!--                color="primary"-->
 
-        >
+<!--        >-->
 
-            <v-text-field
-                    v-model="timeToAccept"
-                    required
-                    color="black"
-                    class="black--text"
-                    type="number"
-                    label="Seconds to accept">
-                <v-icon slot="prepend" color="black" left>alarm</v-icon>
+<!--            <v-text-field-->
+<!--                    v-model="timeToAccept"-->
+<!--                    required-->
+<!--                    color="black"-->
+<!--                    class="black&#45;&#45;text"-->
+<!--                    type="number"-->
+<!--                    label="Seconds to accept">-->
+<!--                <v-icon slot="prepend" color="black" left>alarm</v-icon>-->
 
-            </v-text-field>
+<!--            </v-text-field>-->
 
-        </v-navigation-drawer>
+<!--        </v-navigation-drawer>-->
     </nav>
 </template>
 
@@ -80,8 +80,7 @@
                 isLeftDrawerOpened: false,
                 isRightDrawerOpened: false,
                 links: [
-                    {icon: 'dashboard', title: 'Dashboard', route: '/'},
-                    {icon: 'directions_car', title: 'Parking Lots', route: '/lots'},
+                    {icon: 'dashboard', title: 'Dashboard', route: '/'}
                 ]
             }
         }

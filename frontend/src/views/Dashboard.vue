@@ -3,15 +3,24 @@
         <h1 class="">Dashboard</h1>
 
         <v-container fluid class="my-5">
+            <v-row>
+               <v-col  sm="12" md="6" xs="12" lg="4">
+                    <v-card router :to="'/addLot'">
+                        <v-card-title>
+                        <v-icon large>mdi-plus</v-icon>
+                            </v-card-title>
+
+                        <v-card-text>
+                        <h2>Create new lot</h2>
+                            </v-card-text>
+                    </v-card>
+                </v-col>
+            </v-row>
             <v-row :columns="12">
 
                 <v-col v-for="(lot, index) in lots" sm="12" md="6" xs="12" lg="4" :key="lot.id">
                     <v-card router :to="`lot/${lot.id}`">
-
-
-
                         <v-card-title>
-
                             <v-row :columns="12">
                                 <v-col>
                                     <v-col>
@@ -23,15 +32,11 @@
                                         <v-spacer></v-spacer>
                                         <span>Last update: {{ new Date(lot.timestamp).toLocaleString() }}</span>
                                     </v-col>
-
-
                                 </v-col>
                             </v-row>
 
                         </v-card-title>
-
                         <v-card-text>
-
                             <v-row>
                                 <v-col>
                                     <Chart v-if="history[index]" :chart-data="getChartDataFor(history[index])"
@@ -47,15 +52,19 @@
                         </v-card-text>
 
                         <v-card-actions>
-                            <v-btn  outlined color="black" router :to="`lot/${lot.id}`">
+                            <v-btn outlined color="black" router :to="`lot/${lot.id}`">
                                 <v-icon>edit</v-icon>
                                 <span>Detail</span>
                             </v-btn>
                         </v-card-actions>
 
                     </v-card>
+
                 </v-col>
+
+
             </v-row>
+
         </v-container>
 
     </div>
@@ -89,15 +98,18 @@
                         {
                             label: 'Number of Vacant Spots',
                             borderColor: 'green',
+                            backgroundColor: 'green',
                             data: history.map(h => h.num_vacant)
                         }, {
                             label: 'Number of Occupied Spots',
                             borderColor: 'red',
+                             backgroundColor: 'red',
                             data: history.map(h => h.num_occupied)
                         },
                         {
                             label: 'Number of Unknown Spots',
                             borderColor: 'gray',
+                             backgroundColor: 'gray',
                             data: history.map(h => h.num_unknown)
                         }
                     ]
