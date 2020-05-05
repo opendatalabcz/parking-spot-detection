@@ -57,9 +57,8 @@ if __name__ == "__main__":
 
                 # cv2.imwrite("snapshot2.jpg", frame)
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                frame = cv2.GaussianBlur(frame, (1, 1), cv2.BORDER_DEFAULT)
 
-                msg = ImageMessage(topics.TOPIC_BACKEND, frame.shape, frame, str(frame.dtype), 3)
+                msg = ImageMessage(topics.TOPIC_BACKEND, frame.shape, frame, str(frame.dtype), 4)
 
                 print("Slicer: sending message")
                 counter = 0

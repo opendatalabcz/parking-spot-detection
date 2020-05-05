@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'kafka_consumer',
     'lot_spotter',
+    'slicers',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

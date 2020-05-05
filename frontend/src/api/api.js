@@ -1,10 +1,10 @@
 const axios = require('axios');
 class Api {
     BASE_URL = "http://localhost:8000/api/";
-    BASE_MEDIA_URL = "http://localhost:8000/media/";
 
     LOT_DETAIL = this.BASE_URL+"lot/";
     getLotSpotsUrl = (lotId) => this.BASE_URL+`lot/${lotId}/spot/`;
+    getLotSettingsUrl = (lotId) => this.BASE_URL+`lot/${lotId}/settings/`;
     getLotHistoryUrl = (lotId) => this.BASE_URL+`lot/${lotId}/history/`;
     getSpotHistoryUrl = (lotId, spotId) => this.BASE_URL+`lot/${lotId}/spot/${spotId}/history/`;
 
@@ -32,7 +32,18 @@ class Api {
             method: "post",
             data: params
         });
-    }
+    };
+    saveSettings = (lotId, data) => {
+        const params = new URLSearchParams();
+        params.append("data", JSON.stringify(data));
+        return axios({
+                url: this.getLotSettingsUrl(lotId),
+                method: 'post',
+                data: params
+            });
+    };
+    getLotSettings = (lotId) => axios.get(this.getLotSettingsUrl(lotId));
+
 
 
 }

@@ -2,7 +2,7 @@ import keras
 import numpy as np
 from skimage import transform
 
-W = H = 150
+W = H = 100
 C = 3
 
 class ParkModel(object):

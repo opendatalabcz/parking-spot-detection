@@ -1,19 +1,87 @@
 <template>
 
     <div>
+
+        <v-navigation-drawer
+                v-model="isRightDrawerOpened"
+                app
+                right
+                color="primary"
+        >
+
+
+            <v-container>
+
+
+                <h1>Lot Settings</h1>
+                <v-row justify="center">
+                    <v-text-field
+                            class="text--black"
+                            color="black"
+                            v-model="detectionTTL"
+                            label="Detection TTL"
+                            required
+                    ></v-text-field>
+                </v-row>
+                <v-row justify="center">
+                    <v-text-field
+                            class="text--black"
+                            color="black"
+                            v-model="videoSrc"
+                            :counter="2000"
+                            label="Stream / Video URL"
+                            required
+                    ></v-text-field>
+                </v-row>
+                <v-row justify="center">
+                    <v-switch :label="`Detection ${this.detectionRunning ? 'running' : 'stopped'}`"
+                              v-model="detectionRunning" color="secondary"></v-switch>
+                </v-row>
+
+                <v-row justify="center">
+                    <v-btn @click="saveSettings" color="success" class="text--black ma-2">
+                        <v-icon left>save</v-icon>
+                        <span>Save</span>
+                    </v-btn>
+                </v-row>
+            </v-container>
+
+        </v-navigation-drawer>
+
         <v-progress-linear
                 indeterminate
                 color="yellow darken-2"
                 v-if="loading"
         ></v-progress-linear>
-        <h1>{{ lot.name }}</h1>
 
 
         <v-container class="mx-0 px-0">
+
+                                <v-snackbar
+                        v-model="showSnackbar"
+                >
+                    {{ snackbarText }}
+                    <v-btn
+                            color="pink"
+                            text
+                            :timeout="5000"
+                            @click="showSnackbar = false"
+                    >
+
+                    </v-btn>
+                </v-snackbar>
+            <v-row justify="space-between">
+                <h1 class="ml-5">{{ lot.name }}</h1>
+
+                <v-icon class="mr-2" @click="() => { this.isRightDrawerOpened = !this.isRightDrawerOpened}" large>
+                    settings
+                </v-icon>
+            </v-row>
+
             <v-row justify="center">
 
                 <v-col cols="12">
-                    <v-btn  @click="addParkSpace" color="success" class="text--black ma-2">
+                    <v-btn @click="addParkSpace" color="success" class="text--black ma-2">
                         <v-icon left>mdi-plus</v-icon>
                         <span>Add Parking Space</span>
                     </v-btn>
@@ -30,12 +98,14 @@
                     </v-btn>
                     <v-spacer/>
 
-                    <v-btn :disabled="!selectedRectangle" @click="removeRectangle" color="error" class="text--black ma-2">
+                    <v-btn :disabled="!selectedRectangle" @click="removeRectangle" color="error"
+                           class="text--black ma-2">
                         <v-icon left>mdi-delete</v-icon>
                         <span>Delete</span>
                     </v-btn>
 
-                    <v-btn :disabled="!selectedRectangle" @click="isDetailOpened = true" color="success" class="text--black">
+                    <v-btn :disabled="!selectedRectangle" @click="isDetailOpened = true" color="success"
+                           class="text--black">
                         <v-icon left>info</v-icon>
                         <span>Show Detail</span>
                     </v-btn>
@@ -71,7 +141,7 @@
 
         </v-container>
 
-        <v-dialog v-model="isDetailOpened" fullscreen  transition="dialog-bottom-transition">
+        <v-dialog v-model="isDetailOpened" fullscreen transition="dialog-bottom-transition">
             <v-card>
                 <v-toolbar color="primary">
                     <v-btn icon @click="isDetailOpened = false">
@@ -86,20 +156,21 @@
                 </v-card-title>
 
                 <v-card-text style="display:block;">
-                <h3>History of this spot in time:</h3>
-                <Chart style="height:400px;"
-                       v-if="selectedRectangleHistory && selectedRectangleHistory.labels.length"
-                       :chart-data="selectedRectangleHistory"
+                    <h3>History of this spot in time:</h3>
+                    <Chart style="height:400px;"
+                           v-if="selectedRectangleHistory && selectedRectangleHistory.labels.length"
+                           :chart-data="selectedRectangleHistory"
 
-                       :styles="{
+                           :styles="{
 
                                                 position: 'relative',
                                                 maintainAspectRatio: false,
                                                 responsive: true
                                                 }"
-                />
-                <p v-if="!selectedRectangleHistory || !selectedRectangleHistory.labels.length">No data has been found for this spot.</p>
-                    </v-card-text>
+                    />
+                    <p v-if="!selectedRectangleHistory || !selectedRectangleHistory.labels.length">No data has been
+                        found for this spot.</p>
+                </v-card-text>
 
 
             </v-card>
@@ -142,7 +213,12 @@
                 selectedRectangleHistory: null,
                 selectedRectangle: null,
                 isDetailOpened: false,
-
+                isRightDrawerOpened: false,
+                detectionRunning: false,
+                detectionTTL: 30.0,
+                videoSrc: "",
+                showSnackbar: false,
+                snackbarText: ""
             }
         },
         mounted() {
@@ -151,6 +227,12 @@
             api.getLotSpots(this.lotId).then(response => {
                 this.spots = response.data;
             });
+            api.getLotSettings(this.lotId).then(response => {
+                let d = response.data
+                this.detectionRunning = d.running;
+                this.detectionTTL = d.ttl_to_accept;
+                this.videoSrc = d.video_src;
+            })
 
             this.canvas.setBackgroundImage(`http://localhost:8000/media/snapshot${this.lotId}.jpg`, (image) => {
                 this.canvasWidth = image.width;
@@ -176,7 +258,6 @@
             saveChanges() {
                 this.loading = true;
                 const spotsCopy = JSON.parse(JSON.stringify(this.spots.filter(spot => typeof spot.id == "number")));
-                console.log(this.canvas.getObjects());
 
                 const results = [];
                 this.canvas.getObjects().forEach(o => {
@@ -193,7 +274,6 @@
 
                 });
 
-                console.log(results);
                 api.uploadSpots(this.lotId, results).then(response => {
                     this.spots = response.data;
                     this.loading = false;
@@ -204,7 +284,6 @@
                 this.selectedRectangle = e.id;
                 const data = (await api.getSpotHistory(this.lotId, e.id)).data;
                 this.selectedRectangleHistory = this.getChartDataFor(data);
-                console.log(this.selectedRectangleHistory);
             },
             getChartDataFor(history) {
                 history.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
@@ -220,15 +299,38 @@
                 }
             },
             onCanvasClick(e) {
-                console.log(e);
                 if (!e.target) {
                     this.selectedRectangleHistory = null;
                     this.selectedRectangle = null;
                 }
+            },
+            saveSettings: function() {
+                let data = {
+                    'detection_running': this.detectionRunning,
+                    'video_src': this.videoSrc,
+                    'ttl': this.detectionTTL
+                }
+
+                api.saveSettings(this.lotId, data).then(response =>  {
+                    this.snackbarText = "Saved successfully"
+                    this.showSnackbar = true
+                    let d = response.data
+                    this.detectionRunning = d.running;
+                    this.detectionTTL = d.ttl_to_accept;
+                    this.videoSrc = d.video_src;
+                }, () => {
+                    this.snackbarText = "Something went wrong"
+                    this.showSnackbar = true
+                })
+
             }
         }
     }
 </script>
 
 <style scoped>
+    .custom-label-color .v-label {
+        color: black;
+        opacity: 1;
+    }
 </style>

@@ -18,22 +18,22 @@ class Serializable(object):
 
 class SlicerMessage(Serializable):
 
-    def __init__(self, target_topic, source_url, lot_id):
-        self.target_topic = target_topic
+    def __init__(self, source_url, lot_id, running):
         self.source_url = source_url
         self.lot_id = lot_id
+        self.running = running
 
     def serialize(self):
         return json.dumps({
-            "target_topic": self.target_topic,
             "source_url": self.source_url,
-            "lot_id": self.lot_id
+            "lot_id": self.lot_id,
+            "running": self.running
         })
 
     @staticmethod
     def from_serialized(serialized):
         data = json.loads(serialized)
-        return SlicerMessage(data["target_topic"], data["source_url"], data["lot_id"])
+        return SlicerMessage(data["source_url"], data["lot_id"], data["running"])
 
 class SpotterMesssage(Serializable):
 

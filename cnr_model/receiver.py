@@ -26,7 +26,7 @@ if gpus:
 consumer = MessageConsumer([topics.TOPIC_SPOT], value_deserializer=lambda val: val.decode("UTF-8"),
                            fetch_max_bytes=1024 * 1024 * 40, max_partition_fetch_bytes=1024 * 1024 * 50)
 producer = MessageProducer(value_serializer=lambda val: val.encode("UTF-8"), max_request_size=3173440261)
-model = ParkModel(ParkModel.from_file("cnr-weights-alex1.h5"))
+model = ParkModel(ParkModel.from_file("alex_weights_92.h5"))
 
 for msg in consumer:
     print("MODEL: Received update")

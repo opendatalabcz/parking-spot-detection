@@ -16,7 +16,7 @@ class AutoDateTimeField(models.DateTimeField):
 class LotModel(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.TextField(null=False, max_length=200)
-    video_src = models.TextField(null=True, blank=True, max_length=2000)
+
 
 class ParkingSpotModel(models.Model):
     id = models.AutoField(primary_key=True)
@@ -47,3 +47,5 @@ class SettingsModel(models.Model):
     id = models.AutoField(primary_key=True)
     lot = models.ForeignKey(LotModel, on_delete=models.CASCADE)
     ttl_to_accept = models.IntegerField(default=30, null=False, blank=False)
+    running = models.BooleanField(default=False)
+    video_src = models.URLField(null=True, blank=True, max_length=2000)

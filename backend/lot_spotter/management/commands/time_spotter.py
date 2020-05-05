@@ -14,6 +14,7 @@ from .scene_manager import SceneManager
 from datetime import *
 from common.states import ACCEPTED
 
+
 consumer = MessageConsumer([topics.TOPIC_DETECT, topics.TOPIC_IMAGE, topics.TOPIC_STATUS],
                            value_deserializer=lambda val: val.decode("UTF-8"),
                            fetch_max_bytes=1024 * 1024 * 40, max_partition_fetch_bytes=1024 * 1024 * 50)
