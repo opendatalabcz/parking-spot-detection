@@ -4,53 +4,48 @@
 
         <v-container fluid class="my-5">
             <v-row>
-               <v-col  sm="12" md="6" xs="12" lg="4">
+                <v-col sm="12" md="6" xs="12" lg="4">
                     <v-card router :to="'/addLot'">
                         <v-card-title>
-                        <v-icon large>mdi-plus</v-icon>
-                            </v-card-title>
+                            <v-icon large>mdi-plus</v-icon>
+                        </v-card-title>
 
                         <v-card-text>
-                        <h2>Create new lot</h2>
-                            </v-card-text>
+                            <h2>Create new lot</h2>
+                        </v-card-text>
                     </v-card>
                 </v-col>
             </v-row>
             <v-row :columns="12">
 
-                <v-col v-for="(lot, index) in lots" sm="12" md="6" xs="12" lg="4" :key="lot.id">
+                <v-col v-for="lot in lots" sm="6" md="4" xs="12" lg="4" :key="lot.id">
                     <v-card router :to="`lot/${lot.id}`">
-                        <v-card-title>
+
+                        <v-img max-height="290" v-bind:src="getSnapshot(lot.id)">
+                            <template v-slot:placeholder>
+                                <v-row
+                                        class="fill-height ma-0"
+                                        align="center"
+                                        justify="center"
+                                >
+                                    <v-progress-circular indeterminate color="primary lighten-5"></v-progress-circular>
+                                </v-row>
+                            </template>
+                        </v-img>
+
+                        <v-card-subtitle>
                             <v-row :columns="12">
-                                <v-col>
                                     <v-col>
-                                        <h3>{{ lot.name }}</h3>
-                                        <span>Occupied spots: {{ lot.num_occupied }}</span>
+                                        <h2>{{ lot.name }}</h2>
+                                        <span>Occupied spots: {{ lot.num_occupied || 0 }}</span>
                                         <v-spacer></v-spacer>
-                                        <span>Available spots: {{ lot.num_vacant }}</span>
+                                        <span>Available spots: {{ lot.num_vacant || 0 }}</span>
 
                                         <v-spacer></v-spacer>
-                                        <span>Last update: {{ new Date(lot.timestamp).toLocaleString() }}</span>
+                                        <span>Last update: {{ lot.timestamp ? new Date(lot.timestamp).toLocaleString() : "N/A"  }}</span>
                                     </v-col>
-                                </v-col>
                             </v-row>
-
-                        </v-card-title>
-                        <v-card-text>
-                            <v-row>
-                                <v-col>
-                                    <Chart v-if="history[index]" :chart-data="getChartDataFor(history[index])"
-                                           :styles="{
-                                                position: 'relative',
-                                                maintainAspectRatio: false
-                                                }"
-                                    />
-                                </v-col>
-                            </v-row>
-
-
-                        </v-card-text>
-
+                        </v-card-subtitle>
                         <v-card-actions>
                             <v-btn outlined color="black" router :to="`lot/${lot.id}`">
                                 <v-icon>edit</v-icon>
@@ -73,12 +68,10 @@
 <script>
     const api = require('@/api/api');
     const axios = require('axios').default;
-    import Chart from "../components/Chart";
     // @ is an alias to /src
 
     export default {
         name: 'Dashboard',
-        components: {Chart},
         data() {
             return {
                 lots: [],
@@ -91,6 +84,10 @@
             this.history = allHistory.map((x) => x.data);
         },
         methods: {
+
+            getSnapshot(lotId) {
+                return api.getSnapshotUrl(lotId)
+            },
             getChartDataFor(history) {
                 return {
                     labels: history.map(h => new Date(h.timestamp).toLocaleString()),
@@ -103,13 +100,13 @@
                         }, {
                             label: 'Number of Occupied Spots',
                             borderColor: 'red',
-                             backgroundColor: 'red',
+                            backgroundColor: 'red',
                             data: history.map(h => h.num_occupied)
                         },
                         {
                             label: 'Number of Unknown Spots',
                             borderColor: 'gray',
-                             backgroundColor: 'gray',
+                            backgroundColor: 'gray',
                             data: history.map(h => h.num_unknown)
                         }
                     ]

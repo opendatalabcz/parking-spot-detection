@@ -7,7 +7,7 @@ class Api {
     getLotSettingsUrl = (lotId) => this.BASE_URL+`lot/${lotId}/settings/`;
     getLotHistoryUrl = (lotId) => this.BASE_URL+`lot/${lotId}/history/`;
     getSpotHistoryUrl = (lotId, spotId) => this.BASE_URL+`lot/${lotId}/spot/${spotId}/history/`;
-
+    getSnapshotUrl = lotId => this.BASE_URL+`lot/${lotId}/snapshot/`
     fetchImage = (url) => axios.get(this.BASE_MEDIA_URL+url);
     getLotDetail = (id) => axios.get(this.LOT_DETAIL+id);
     getLots = () => axios.get(this.LOT_DETAIL);

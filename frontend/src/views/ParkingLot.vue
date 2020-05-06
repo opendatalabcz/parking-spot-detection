@@ -57,19 +57,19 @@
 
         <v-container class="mx-0 px-0">
 
-                                <v-snackbar
-                        v-model="showSnackbar"
+            <v-snackbar
+                    v-model="showSnackbar"
+            >
+                {{ snackbarText }}
+                <v-btn
+                        color="pink"
+                        text
+                        :timeout="5000"
+                        @click="showSnackbar = false"
                 >
-                    {{ snackbarText }}
-                    <v-btn
-                            color="pink"
-                            text
-                            :timeout="5000"
-                            @click="showSnackbar = false"
-                    >
 
-                    </v-btn>
-                </v-snackbar>
+                </v-btn>
+            </v-snackbar>
             <v-row justify="space-between">
                 <h1 class="ml-5">{{ lot.name }}</h1>
 
@@ -78,102 +78,138 @@
                 </v-icon>
             </v-row>
 
-            <v-row justify="center">
+            <v-row justify="space-around">
+                <v-col class="px-5" sm="12" md="6" xs="12" lg="6">
+                    <span>Occupied spots: {{ lot.history__num_occupied || 0 }}</span>
+                    <v-spacer></v-spacer>
+                    <span>Available spots: {{ lot.history__num_vacant || 0 }}</span>
 
-                <v-col cols="12">
-                    <v-btn @click="addParkSpace" color="success" class="text--black ma-2">
-                        <v-icon left>mdi-plus</v-icon>
-                        <span>Add Parking Space</span>
-                    </v-btn>
+                    <v-spacer></v-spacer>
+                    <span>Last update: {{ lot.history__timestamp ? new Date(lot.history__timestamp).toLocaleString() : "N/A"  }}</span>
+                </v-col>
+                <v-col sm="12" md="6" xs="12" lg="6">
+                    <v-card>
+                        <v-card-title>Lot History Chart</v-card-title>
+                        <v-card-text>
+                            <Chart v-if="history" sm="6" md="4" xs="12" lg="4" :chart-data="getChartDataForLot(history)"
+                                   :styles="{
+                                                position: 'relative',
+                                                maintainAspectRatio: false
+                                                }"
+                            />
+                        </v-card-text>
+                    </v-card>
 
-                    <v-btn @click="addBlocker" color="error" class="text--black">
-                        <v-icon left>mdi-plus</v-icon>
-                        <span>Add Blocker</span>
-                    </v-btn>
-
-
-                    <v-btn @click="saveChanges" color="success" class="text--black ma-2">
-                        <v-icon left>save</v-icon>
-                        <span>Save Changes</span>
-                    </v-btn>
-                    <v-spacer/>
-
-                    <v-btn :disabled="!selectedRectangle" @click="removeRectangle" color="error"
-                           class="text--black ma-2">
-                        <v-icon left>mdi-delete</v-icon>
-                        <span>Delete</span>
-                    </v-btn>
-
-                    <v-btn :disabled="!selectedRectangle" @click="isDetailOpened = true" color="success"
-                           class="text--black">
-                        <v-icon left>info</v-icon>
-                        <span>Show Detail</span>
-                    </v-btn>
                 </v-col>
             </v-row>
 
+            <v-card>
+                <v-card-title>
+                    Parking Lot Detection Overview
+                </v-card-title>
+                <v-row justify="center">
 
-            <v-row :columns="12">
+                    <v-col cols="12">
+                        <v-btn @click="addParkSpace" color="success" class="text--black ma-2">
+                            <v-icon left>mdi-plus</v-icon>
+                            <span>Add Parking Space</span>
+                        </v-btn>
 
-                <v-col cols="12">
-                    <fabric-canvas justify="center" ref="canvas" :height="canvasHeight" :width="canvasWidth">
-                        <fabric-Rectangle ref="canvasSpots" v-for="(spot) in spots" :key="spot.id"
-                                          :id="spot.id || ''"
-                                          :borderColor="'orange'"
-                                          :hasBorder="true"
-                                          :left="spot.coordinates[0]"
-                                          :top="spot.coordinates[1]"
-                                          :width="spot.coordinates[2] - spot.coordinates[0]"
-                                          :height="spot.coordinates[3] - spot.coordinates[1]"
-                                          :strokeDashArray="[0,0]"
-                                          :stroke="spotColors[spot.status.toString()]"
-                                          :fill="'#00000000'"
-                                          @mousedown="onRectangleClick"
-                                          :strokeWidth="2"
-                                          :borderScaleFactor="0"
-                                          :originX="'left'"
-                                          :originY="'top'"
-                        ></fabric-Rectangle>
+                        <v-btn @click="addBlocker" color="error" class="text--black">
+                            <v-icon left>mdi-plus</v-icon>
+                            <span>Add Blocker</span>
+                        </v-btn>
 
-                    </fabric-canvas>
-                </v-col>
-            </v-row>
+
+                        <v-btn @click="saveChanges" color="success" class="text--black ma-2">
+                            <v-icon left>save</v-icon>
+                            <span>Save Changes</span>
+                        </v-btn>
+                        <v-spacer/>
+
+                        <v-btn :disabled="!selectedRectangle" @click="removeRectangle" color="error"
+                               class="text--black ma-2">
+                            <v-icon left>mdi-delete</v-icon>
+                            <span>Delete</span>
+                        </v-btn>
+
+                        <v-btn :disabled="!selectedRectangle" @click="isDetailOpened = true" color="success"
+                               class="text--black">
+                            <v-icon left>info</v-icon>
+                            <span>Show Detail</span>
+                        </v-btn>
+                    </v-col>
+                </v-row>
+
+
+                <v-row :columns="12">
+
+                    <v-col sm="6" md="4" xs="12" lg="4">
+                        <fabric-canvas justify="center" ref="canvas" :height="canvasHeight" :width="canvasWidth">
+                            <fabric-Rectangle ref="canvasSpots" v-for="(spot) in spots" :key="spot.id"
+                                              :id="spot.id || ''"
+                                              :borderColor="'orange'"
+                                              :hasBorder="true"
+                                              :left="spot.coordinates[0]"
+                                              :top="spot.coordinates[1]"
+                                              :width="spot.coordinates[2] - spot.coordinates[0]"
+                                              :height="spot.coordinates[3] - spot.coordinates[1]"
+                                              :strokeDashArray="[0,0]"
+                                              :stroke="spotColors[spot.status.toString()]"
+                                              :fill="'#00000000'"
+                                              @mousedown="onRectangleClick"
+                                              :strokeWidth="2"
+                                              :borderScaleFactor="0"
+                                              :originX="'left'"
+                                              :originY="'top'"
+                            ></fabric-Rectangle>
+
+                        </fabric-canvas>
+                    </v-col>
+                </v-row>
+            </v-card>
 
         </v-container>
 
-        <v-dialog v-model="isDetailOpened" fullscreen transition="dialog-bottom-transition">
-            <v-card>
-                <v-toolbar color="primary">
-                    <v-btn icon @click="isDetailOpened = false">
-                        <v-icon>mdi-close</v-icon>
-                    </v-btn>
-                    <v-spacer></v-spacer>
-                </v-toolbar>
+        <v-dialog v-model="isDetailOpened" transition="dialog-bottom-transition">
 
-                <v-card-title>
-                    <h2>Parking Spot ID: {{ selectedRectangle }}</h2>
+                <v-row :columns="12">
+                    <v-col md="12" sd="12" xs="12" lg="12">
+                        <v-card>
+                            <v-toolbar color="primary">
+                                <v-btn icon @click="isDetailOpened = false">
+                                    <v-icon>mdi-close</v-icon>
+                                </v-btn>
+                                <v-spacer></v-spacer>
+                            </v-toolbar>
 
-                </v-card-title>
+                            <v-card-title>
+                                <h2>Parking Spot ID: {{ selectedRectangle }}</h2>
 
-                <v-card-text style="display:block;">
-                    <h3>History of this spot in time:</h3>
-                    <Chart style="height:400px;"
-                           v-if="selectedRectangleHistory && selectedRectangleHistory.labels.length"
-                           :chart-data="selectedRectangleHistory"
+                            </v-card-title>
 
-                           :styles="{
+                            <v-card-text style="display:block;">
+                                <h3>History of this spot in time:</h3>
+                                <Chart style="height:400px;"
+                                       v-if="selectedRectangleHistory && selectedRectangleHistory.labels.length"
+                                       :chart-data="selectedRectangleHistory"
+
+                                       :styles="{
 
                                                 position: 'relative',
                                                 maintainAspectRatio: false,
                                                 responsive: true
                                                 }"
-                    />
-                    <p v-if="!selectedRectangleHistory || !selectedRectangleHistory.labels.length">No data has been
-                        found for this spot.</p>
-                </v-card-text>
+                                />
+                                <p v-if="!selectedRectangleHistory || !selectedRectangleHistory.labels.length">No data
+                                    has been
+                                    found for this spot.</p>
+                            </v-card-text>
 
 
-            </v-card>
+                        </v-card>
+                    </v-col>
+                </v-row>
 
         </v-dialog>
 
@@ -218,12 +254,20 @@
                 detectionTTL: 30.0,
                 videoSrc: "",
                 showSnackbar: false,
-                snackbarText: ""
+                snackbarText: "",
+                history: []
             }
         },
         mounted() {
             this.canvas = this.$refs.canvas.canvas;
-            api.getLotDetail(this.lotId).then(response => this.lot = response.data);
+            api.getLotDetail(this.lotId).then(response => {
+                console.log(response.data)
+                this.lot = response.data
+            });
+
+            api.getLotHistory(this.lotId).then(response => {
+                this.history = response.data
+            })
             api.getLotSpots(this.lotId).then(response => {
                 this.spots = response.data;
             });
@@ -234,7 +278,7 @@
                 this.videoSrc = d.video_src;
             })
 
-            this.canvas.setBackgroundImage(`http://localhost:8000/media/snapshot${this.lotId}.jpg`, (image) => {
+            this.canvas.setBackgroundImage(api.getSnapshotUrl(this.lotId), (image) => {
                 this.canvasWidth = image.width;
                 this.canvasHeight = image.height;
             });
@@ -283,9 +327,9 @@
             async onRectangleClick(e) {
                 this.selectedRectangle = e.id;
                 const data = (await api.getSpotHistory(this.lotId, e.id)).data;
-                this.selectedRectangleHistory = this.getChartDataFor(data);
+                this.selectedRectangleHistory = this.getChartDataForSpot(data);
             },
-            getChartDataFor(history) {
+            getChartDataForSpot(history) {
                 history.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
                 return {
                     labels: history.map(h => new Date(h.timestamp).toLocaleString()),
@@ -293,7 +337,31 @@
                         {
                             label: 'Occupancy Status',
                             borderColor: 'orange',
-                            data: history.map(h => h.occupancy)
+                            data: history.map(h => h.occupancy == 1 ? 1 : -1)
+                        }
+                    ]
+                }
+            },
+            getChartDataForLot(history) {
+                return {
+                    labels: history.map(h => new Date(h.timestamp).toLocaleString()),
+                    datasets: [
+                        {
+                            label: 'Number of Vacant Spots',
+                            borderColor: 'green',
+                            backgroundColor: 'green',
+                            data: history.map(h => h.num_vacant)
+                        }, {
+                            label: 'Number of Occupied Spots',
+                            borderColor: 'red',
+                            backgroundColor: 'red',
+                            data: history.map(h => h.num_occupied)
+                        },
+                        {
+                            label: 'Number of Unknown Spots',
+                            borderColor: 'gray',
+                            backgroundColor: 'gray',
+                            data: history.map(h => h.num_unknown)
                         }
                     ]
                 }
@@ -304,14 +372,14 @@
                     this.selectedRectangle = null;
                 }
             },
-            saveSettings: function() {
+            saveSettings: function () {
                 let data = {
                     'detection_running': this.detectionRunning,
                     'video_src': this.videoSrc,
                     'ttl': this.detectionTTL
                 }
 
-                api.saveSettings(this.lotId, data).then(response =>  {
+                api.saveSettings(this.lotId, data).then(response => {
                     this.snackbarText = "Saved successfully"
                     this.showSnackbar = true
                     let d = response.data

@@ -19,7 +19,7 @@
                             <v-icon class="text-center" color="blue" size="100">local_parking</v-icon>
                         </v-responsive>
 
-                        <v-card-title>{{ lot.name }}</v-card-title>
+                        <v-card-title>{{ lot.name  }}</v-card-title>
 
                         <v-card-subtitle>{{ lot.lastUpdate }}</v-card-subtitle>
                     </v-card>

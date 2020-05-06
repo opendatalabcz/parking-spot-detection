@@ -8,11 +8,11 @@ from common.messages import DetectorMessage, ImageMessage, SpotterMesssage, LotS
 from common.producers import MessageProducer
 from common.rect import Rect
 from common.states import DECAYED
-from kafka_consumer.models import LotModel, ParkingSpotModel, LotHistoryModel, SpotHistoryModel
+from kafka_consumer.models import LotModel, ParkingSpotModel, LotHistoryModel, SpotHistoryModel, SettingsModel
 from .scene import Scene
 from .scene_manager import SceneManager
 from datetime import *
-from common.states import ACCEPTED
+from common.states import ACCEPTED, BLOCKER
 
 
 consumer = MessageConsumer([topics.TOPIC_DETECT, topics.TOPIC_IMAGE, topics.TOPIC_STATUS],
@@ -24,9 +24,11 @@ producer = MessageProducer(value_serializer=lambda val: val.encode("UTF-8"), max
 def handle_detect_message(message):
     msg = DetectorMessage.from_serialized(message.value)
     lot = LotModel.objects.get(id=msg.lot_id)
+    settings = SettingsModel.objects.get(lot_id=msg.lot_id)
     spots = ParkingSpotModel.objects.filter(lot=lot)
 
-    scene = Scene(lot, list(spots))
+
+    scene = Scene(lot, list(spots), settings.ttl_to_accept)
     updated = scene.process_data([Rect.from_array(r) for r in msg.rects])
 
     for spot in updated:
@@ -36,6 +38,7 @@ def handle_detect_message(message):
             spot.save()
 
     for spot in spots:
+
         spot.save()
 
     print("Updating ParkingSpotModels")
