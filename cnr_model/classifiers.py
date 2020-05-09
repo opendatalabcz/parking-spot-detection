@@ -1,5 +1,5 @@
 from keras import Sequential
-from keras.layers import Conv2D, BatchNormalization, Dense, Activation, Flatten, MaxPooling2D, Dropout, SpatialDropout2D
+from keras.layers import Conv2D, BatchNormalization, Dense, Activation, Flatten, MaxPooling2D, Dropout, SpatialDropout2D, Input
 from keras import optimizers
 from keras.applications.vgg16 import VGG16
 from keras.applications.vgg19 import VGG19
@@ -227,9 +227,10 @@ class MyNet5(Classifier):
         model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2)))
 
         model.add(Flatten())
+        model.add(Dense(64, activation='relu'))
+        model.add(Dropout(0.25))
         model.add(Dense(32, activation='relu'))
         model.add(Dropout(0.25))
-
         model.add(Dense(num_classes, activation='softmax'))
 
         sgd = optimizers.SGD(lr=0.01, decay=5e-4, momentum=0.9, nesterov=True)
@@ -237,6 +238,31 @@ class MyNet5(Classifier):
         model.compile(optimizer="adam", loss='categorical_crossentropy', metrics=['accuracy'])
         return model
 
+
+class CustomAlex2(Classifier):
+    def build(self, input_shape=(W, H, 1), num_classes=2) -> Sequential:
+        model = Sequential()
+        model.add(Conv2D(16, (11, 11), input_shape=input_shape, strides=(4, 4), padding='same'))
+        model.add(Activation('relu'))
+        model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2)))
+
+        model.add(Conv2D(20, (5, 5), strides=(1, 1), padding='same'))
+        model.add(Activation('relu'))
+        model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2)))
+
+        model.add(Conv2D(30, (3, 3), strides=(1, 1), padding='same'))
+        model.add(Activation('relu'))
+        model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2)))
+
+        model.add(Flatten())
+        model.add(Dense(48, activation='relu'))
+
+        model.add(Dense(num_classes, activation='softmax'))
+
+        sgd = optimizers.SGD(lr=0.01, decay=5e-4, momentum=0.9, nesterov=True)
+
+        model.compile(optimizer="adam", loss='categorical_crossentropy', metrics=['accuracy'])
+        return model
 
 class CustomAlex1(Classifier):
     def build(self, input_shape=(W, H, 3), num_classes=2) -> Sequential:
