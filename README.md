@@ -15,4 +15,9 @@ Images are taken from the camera specified for the parking lot and object detect
 of vehicles. Vehicles are used as a point of reference in order to get the parking spots. Parking spots are then
 classified on the newest snapshot from camera using custom trained classifier. Results are presented on a 
 web page. 
+
 ![](readme-img1.png)
+
+## Thesis
+The source of the masters thesis can be found in following repo. https://github.com/grohj/Park-Detector-Thesis
+
