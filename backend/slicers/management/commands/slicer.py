@@ -15,15 +15,16 @@ from common import topics
 from django.utils import text
 import multiprocessing as mp
 import codecs
+from common.settings import SLICER_CHECK_INTERVAL
+from common.groups import SLICERS_GROUP
 
 consumer = MessageConsumer([topics.TOPIC_SLICE], value_deserializer=lambda val: val.decode("UTF-8"),
-                           group_id="slice-group", auto_commit_interval_ms=1000, enable_auto_commit=True,
+                           group_id=SLICERS_GROUP, auto_commit_interval_ms=1000, enable_auto_commit=True,
                            auto_offset_reset='earliest')
 producer = MessageProducer(value_serializer=lambda val: val.encode("UTF-8"), max_request_size=3173440261)
 procs = {}
 
 def slice(url, lot_id):
-    # url = url.replace("\\", "/")
     print(f"starting on URL {url}")
     capture = cv2.VideoCapture(url, cv2.CAP_FFMPEG)
     if capture and capture.isOpened():
@@ -85,28 +86,5 @@ class Command(BaseCommand):
     help = 'Manages slicers for lots'
     def handle(self, *args, **options):
         while True:
-            sleep(4)
-
+            sleep(SLICER_CHECK_INTERVAL)
             update_procs()
-
-
-            # msg = consumer.poll(max_records=1)
-            #
-            # if msg:
-            #     for item in six.iteritems(msg):
-            #         _, msgs = item
-            #
-            #         for msg in msgs:
-            #             print(msg)
-            #             if msg.topic == topics.TOPIC_SLICE:
-            #                 message = SlicerMessage.from_serialized(msg.value)
-            #                 if message.running:
-            #                     if message.lot_id not in procs or not procs[message.lot_id].is_alive():
-            #                         start_process(message.source_url, message.lot_id)
-            #                         print(procs)
-            #                         set_settings_running(message.lot_id, True)
-            #                 else:
-            #                     if message.lot_id in procs and procs[message.lot_id].is_alive():
-            #                         procs[message.lot_id].terminate()
-            #                         del procs[message.lot_id]
-            #                         set_settings_running(message.lot_id, False)

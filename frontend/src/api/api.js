@@ -1,7 +1,7 @@
 const axios = require('axios');
 class Api {
-    BASE_URL = "http://localhost:8000/api/";
-
+    BACKEND_URL = "http://localhost:8000/"
+    BASE_URL = this.BACKEND_URL + "api/";
     LOT_DETAIL = this.BASE_URL+"lot/";
     getLotSpotsUrl = (lotId) => this.BASE_URL+`lot/${lotId}/spot/`;
     getLotSettingsUrl = (lotId) => this.BASE_URL+`lot/${lotId}/settings/`;

@@ -10,10 +10,13 @@
         >
 
 
-            <v-container>
+            <v-container class="ma-2">
 
 
-                <h1>Lot Settings</h1>
+                <v-row>
+                    <h1>Lot Settings</h1>
+                </v-row>
+
                 <v-row justify="center">
                     <v-text-field
                             class="text--black"
@@ -72,14 +75,17 @@
             </v-snackbar>
             <v-row justify="space-between">
                 <h1 class="ml-5">{{ lot.name }}</h1>
-
+                <v-btn @click="loadData" color="success" class="text--black ma-2">
+                    <v-icon left>refresh</v-icon>
+                    <span>Refresh</span>
+                </v-btn>
                 <v-icon class="mr-2" @click="() => { this.isRightDrawerOpened = !this.isRightDrawerOpened}" large>
                     settings
                 </v-icon>
             </v-row>
 
             <v-row justify="space-around">
-                <v-col class="px-5" sm="12" md="6" xs="12" lg="6">
+                <v-col class="px-5" sm="12" md="12" xs="12" lg="6">
                     <span>Occupied spots: {{ lot.history__num_occupied || 0 }}</span>
                     <v-spacer></v-spacer>
                     <span>Available spots: {{ lot.history__num_vacant || 0 }}</span>
@@ -87,7 +93,7 @@
                     <v-spacer></v-spacer>
                     <span>Last update: {{ lot.history__timestamp ? new Date(lot.history__timestamp).toLocaleString() : "N/A"  }}</span>
                 </v-col>
-                <v-col sm="12" md="6" xs="12" lg="6">
+                <v-col sm="12" md="12" xs="12" lg="6">
                     <v-card>
                         <v-card-title>Lot History Chart</v-card-title>
                         <v-card-text>
@@ -142,7 +148,7 @@
                 </v-row>
 
 
-                <v-row :columns="12">
+                <v-row :columns="12" id="parking-lot-layout">
 
                     <v-col sm="6" md="4" xs="12" lg="4">
                         <fabric-canvas justify="center" ref="canvas" :height="canvasHeight" :width="canvasWidth">
@@ -173,43 +179,43 @@
 
         <v-dialog v-model="isDetailOpened" transition="dialog-bottom-transition">
 
-                <v-row :columns="12">
-                    <v-col md="12" sd="12" xs="12" lg="12">
-                        <v-card>
-                            <v-toolbar color="primary">
-                                <v-btn icon @click="isDetailOpened = false">
-                                    <v-icon>mdi-close</v-icon>
-                                </v-btn>
-                                <v-spacer></v-spacer>
-                            </v-toolbar>
+            <v-row :columns="12">
+                <v-col md="12" sd="12" xs="12" lg="12">
+                    <v-card>
+                        <v-toolbar color="primary">
+                            <v-btn icon @click="isDetailOpened = false">
+                                <v-icon>mdi-close</v-icon>
+                            </v-btn>
+                            <v-spacer></v-spacer>
+                        </v-toolbar>
 
-                            <v-card-title>
-                                <h2>Parking Spot ID: {{ selectedRectangle }}</h2>
+                        <v-card-title>
+                            <h2>Parking Spot ID: {{ selectedRectangle }}</h2>
 
-                            </v-card-title>
+                        </v-card-title>
 
-                            <v-card-text style="display:block;">
-                                <h3>History of this spot in time:</h3>
-                                <Chart style="height:400px;"
-                                       v-if="selectedRectangleHistory && selectedRectangleHistory.labels.length"
-                                       :chart-data="selectedRectangleHistory"
+                        <v-card-text style="display:block;">
+                            <h3>History of this spot in time:</h3>
+                            <Chart style="height:400px;"
+                                   v-if="selectedRectangleHistory && selectedRectangleHistory.labels.length"
+                                   :chart-data="selectedRectangleHistory"
 
-                                       :styles="{
+                                   :styles="{
 
                                                 position: 'relative',
                                                 maintainAspectRatio: false,
                                                 responsive: true
                                                 }"
-                                />
-                                <p v-if="!selectedRectangleHistory || !selectedRectangleHistory.labels.length">No data
-                                    has been
-                                    found for this spot.</p>
-                            </v-card-text>
+                            />
+                            <p v-if="!selectedRectangleHistory || !selectedRectangleHistory.labels.length">No data
+                                has been
+                                found for this spot.</p>
+                        </v-card-text>
 
 
-                        </v-card>
-                    </v-col>
-                </v-row>
+                    </v-card>
+                </v-col>
+            </v-row>
 
         </v-dialog>
 
@@ -255,46 +261,62 @@
                 videoSrc: "",
                 showSnackbar: false,
                 snackbarText: "",
-                history: []
+                history: [],
+                spotsLoaded: false
             }
         },
         mounted() {
             this.canvas = this.$refs.canvas.canvas;
-            api.getLotDetail(this.lotId).then(response => {
-                console.log(response.data)
-                this.lot = response.data
-            });
-
-            api.getLotHistory(this.lotId).then(response => {
-                this.history = response.data
-            })
-            api.getLotSpots(this.lotId).then(response => {
-                this.spots = response.data;
-            });
-            api.getLotSettings(this.lotId).then(response => {
-                let d = response.data
-                this.detectionRunning = d.running;
-                this.detectionTTL = d.ttl_to_accept;
-                this.videoSrc = d.video_src;
-            })
-
-            this.canvas.setBackgroundImage(api.getSnapshotUrl(this.lotId), (image) => {
-                this.canvasWidth = image.width;
-                this.canvasHeight = image.height;
-            });
-
-            this.canvas.on("mouse:down", (e) => {
-                this.onCanvasClick(e)
-            });
+            this.loadData()
+            this.invervalId = setInterval(this.loadData, 10000)
+        },
+        beforeDestroy() {
+            clearInterval(this.invervalId)
         },
         methods: {
+            loadData() {
+                console.log("tick")
+                api.getLotDetail(this.lotId).then(response => {
+                    console.log(response.data)
+                    this.lot = response.data
+                });
+
+                api.getLotHistory(this.lotId).then(response => {
+                    this.history = response.data
+                })
+
+                if (!this.spotsLoaded) {
+                    api.getLotSpots(this.lotId).then(response => {
+                        this.spotsLoaded = true
+                        this.spots = response.data;
+                    });
+                }
+                api.getLotSettings(this.lotId).then(response => {
+                    let d = response.data
+                    this.detectionRunning = d.running;
+                    this.detectionTTL = d.ttl_to_accept;
+                    this.videoSrc = d.video_src;
+                })
+
+                this.canvas.setBackgroundImage(api.getSnapshotUrl(this.lotId), (image) => {
+                    this.canvasWidth = image.width;
+                    this.canvasHeight = image.height;
+                });
+
+                this.canvas.on("mouse:down", (e) => {
+                    this.onCanvasClick(e)
+                });
+            },
+            reloadPage() {
+                window.location.reload()
+            },
             addParkSpace() {
                 this.spots.push({id: "spot" + this.seedId, "coordinates": [50, 50, 100, 100], "status": 1});
                 this.seedId++;
             },
             addBlocker() {
                 this.spots.push({id: "blocker" + this.seedId, coordinates: [50, 50, 100, 100], "status": 0});
-                this.seedIt++;
+                this.seedId++;
             },
             removeRectangle() {
                 this.canvas.remove(this.canvas.getActiveObject())
@@ -400,5 +422,9 @@
     .custom-label-color .v-label {
         color: black;
         opacity: 1;
+    }
+
+    #parking-lot-layout {
+        overflow: hidden;
     }
 </style>

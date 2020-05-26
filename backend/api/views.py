@@ -67,7 +67,7 @@ def lot_spot(request, lot_id, spot_id=None):
         print(data)
         if data:
             data = json.loads(data)
-            all_spots = list(ParkingSpotModel.objects.all())
+            all_spots = list(ParkingSpotModel.objects.filter(lot_id=lot_id))
 
             for item in data:
                 if item["id"] != -1:

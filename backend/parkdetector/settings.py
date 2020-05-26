@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
-from .db_secrets import DB_PASS, DB_USER
+from common.settings import DB_PASS, DB_USER, DB_HOST, DB_PORT, DB_NAME
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -23,9 +23,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = ')(@q-7j5n^cos8r=gsmbr14wrh#f*wkdkg(a4z0fap=k56dnrg'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -83,11 +83,11 @@ WSGI_APPLICATION = 'parkdetector.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'park_db',
+        'NAME': DB_NAME,
         'USER': DB_USER,
         'PASSWORD': DB_PASS,
-        'HOST': 'localhost',
-        'PORT': 5432,
+        'HOST': DB_HOST,
+        'PORT': DB_PORT,
     }
 }
 

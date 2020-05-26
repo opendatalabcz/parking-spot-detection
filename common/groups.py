@@ -1,0 +1,1 @@
+SLICERS_GROUP = "slice-group"

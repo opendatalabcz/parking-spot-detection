@@ -13,7 +13,7 @@ from .scene import Scene
 from .scene_manager import SceneManager
 from datetime import *
 from common.states import ACCEPTED, BLOCKER
-
+from common.settings import CLASSIFY_PERIOD_SECONDS
 
 consumer = MessageConsumer([topics.TOPIC_DETECT, topics.TOPIC_IMAGE, topics.TOPIC_STATUS],
                            value_deserializer=lambda val: val.decode("UTF-8"),
@@ -27,7 +27,6 @@ def handle_detect_message(message):
     settings = SettingsModel.objects.get(lot_id=msg.lot_id)
     spots = ParkingSpotModel.objects.filter(lot=lot)
 
-
     scene = Scene(lot, list(spots), settings.ttl_to_accept)
     updated = scene.process_data([Rect.from_array(r) for r in msg.rects])
 
@@ -38,7 +37,6 @@ def handle_detect_message(message):
             spot.save()
 
     for spot in spots:
-
         spot.save()
 
     print("Updating ParkingSpotModels")
@@ -52,14 +50,15 @@ def handle_detect_message(message):
         pass
 
 
-LAST_CLASSIFICATION : datetime = None
+LAST_CLASSIFICATION: datetime = None
 
 
 def handle_image_message(message):
     global LAST_CLASSIFICATION
-    if not LAST_CLASSIFICATION or datetime.now() - LAST_CLASSIFICATION >= timedelta(seconds=20):
+    if not LAST_CLASSIFICATION or datetime.now() - LAST_CLASSIFICATION >= timedelta(seconds=CLASSIFY_PERIOD_SECONDS):
         msg = ImageMessage.from_serialized(message.value)
         lot = LotModel.objects.get(id=msg.lot_id)
+
         spots = list(ParkingSpotModel.objects.filter(lot=lot, status=ACCEPTED).values('id', 'coordinates'))
         spots = {spot["id"]: {"coordinates": spot["coordinates"]} for spot in spots}
         print(spots)
