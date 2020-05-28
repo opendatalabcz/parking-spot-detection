@@ -1,1 +1,4 @@
 *.h5
+/debugger/
+/slicer/
+/spotter/

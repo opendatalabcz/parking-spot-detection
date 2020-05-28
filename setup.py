@@ -11,7 +11,7 @@ if __name__ == "__main__":
         version="0.0.1",
         packages=find_packages(),
         author='Jiri Groh',
-        author_email='email@email.com',
+        author_email='jirigrohu@gmail.com',
         install_requires=requires,
         description='',
         include_package_data=True,
