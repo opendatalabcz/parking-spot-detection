@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
+    "serve": "vue-cli-service serve --port 80",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
@@ -27,6 +27,7 @@
     "@vue/cli-plugin-router": "~4.2.3",
     "@vue/cli-service": "~4.2.3",
     "babel-eslint": "^10.1.0",
+    "@babel/compat-data": "^7.9.0",
     "eslint": "^6.8.0",
     "eslint-plugin-vue": "^6.2.2",
     "material-design-icons-iconfont": "^5.0.1",

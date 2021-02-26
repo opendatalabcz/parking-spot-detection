@@ -13,6 +13,9 @@ services:
       POSTGRES_PASSWORD: admin
       POSTGRES_USER: postgres
       PGDATA: ./postgres_data
+    volumes: 
+      - db_data:/var/lib/postgresql/data
+      - ./db:/docker-entrypoint-initdb.d
     networks:
       - postgres
 
@@ -58,3 +61,14 @@ services:
       KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 5000
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+
+  frontend: 
+    build: 
+      context: ./frontend
+    ports: 
+      - 80:80
+    expose: 
+      - "80"
+
+volumes: 
+  db_data:
