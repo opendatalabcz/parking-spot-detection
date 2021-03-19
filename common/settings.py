@@ -1,12 +1,12 @@
 # PostgreSQL DB configuration
-DB_HOST = "localhost"
+DB_HOST = "db"
 DB_PORT = 5432
 DB_USER = "postgres"
 DB_PASS = "admin"
 DB_NAME = "park_db"
 
 # Kafka configuration
-KAFKA_SERVERS = ["localhost:9092"]  # Servers are list of format ['host:post', 'host:port', ...]
+KAFKA_SERVERS = ["kafka:9093"]  # Servers are list of format ['host:post', 'host:port', ...]
 
 # Application configuration
 SLICER_CHECK_INTERVAL = 4

@@ -1,4 +1,7 @@
 *.h5
+.vscode
+.venv
 /debugger/
 /slicer/
 /spotter/
+__pycache__
