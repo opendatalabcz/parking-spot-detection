@@ -28,7 +28,7 @@ Django==2.2.10
 django-cors-headers==3.2.1
 django-extensions==2.2.8
 django-logpipe==0.3.2
-djangorestframework==3.11.0
+djangorestframework==3.11.2
 docutils==0.16
 entrypoints==0.3
 gast==0.2.2
