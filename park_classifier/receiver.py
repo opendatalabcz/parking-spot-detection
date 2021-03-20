@@ -15,6 +15,7 @@ import numpy as np
 from park_model import ParkModel
 import tensorflow as tf
 from common.states import ACCEPTED, OCCUPIED, UNKNOWN, VACANT
+import logging
 gpus = tf.config.experimental.list_physical_devices('GPU')
 if gpus:
     try:
@@ -23,9 +24,12 @@ if gpus:
     except RuntimeError as e:
         print(e)
 
+logging.error("Creating consumer.")
 consumer = MessageConsumer([topics.TOPIC_SPOT], value_deserializer=lambda val: val.decode("UTF-8"),
                            fetch_max_bytes=1024 * 1024 * 40, max_partition_fetch_bytes=1024 * 1024 * 50)
+logging.error("Creating producer.")
 producer = MessageProducer(value_serializer=lambda val: val.encode("UTF-8"), max_request_size=3173440261)
+logging.error("Producer and Consumer created.")
 model = ParkModel(ParkModel.from_file("classifier_model_weights.h5"))
 # model = ParkModel(ParkModel.from_file("net5"))
 model.model.summary()

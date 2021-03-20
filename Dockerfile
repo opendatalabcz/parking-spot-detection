@@ -4,7 +4,7 @@ FROM ubuntu
 RUN apt update && \
     apt -y install software-properties-common && \
     add-apt-repository -y ppa:deadsnakes/ppa && \
-    apt -y install git python3.7 tk-dev python3-pip libpq-dev python3.7-dev build-essential
+    apt -y install git python3.7 tk-dev python3-pip libpq-dev python3.7-dev build-essential python3.7-tk
 
 COPY ./backend /app/backend
 COPY ./common  /app/common

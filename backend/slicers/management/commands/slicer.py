@@ -18,16 +18,20 @@ import codecs
 from common.settings import SLICER_CHECK_INTERVAL
 from common.groups import SLICERS_GROUP
 
-consumer = MessageConsumer([topics.TOPIC_SLICE], value_deserializer=lambda val: val.decode("UTF-8"),
-                           group_id=SLICERS_GROUP, auto_commit_interval_ms=1000, enable_auto_commit=True,
+consumer = MessageConsumer([topics.TOPIC_SLICE],
+                           value_deserializer=lambda val: val.decode("UTF-8"),
+                           group_id=SLICERS_GROUP,
+                           auto_commit_interval_ms=1000,
+                           enable_auto_commit=True,
                            auto_offset_reset='earliest')
-producer = MessageProducer(value_serializer=lambda val: val.encode("UTF-8"), max_request_size=3173440261)
 procs = {}
 
 def slice(url, lot_id):
-    print(f"starting on URL {url}")
+    producer = MessageProducer(value_serializer=lambda val: val.encode("UTF-8"),
+                               max_request_size=3173440261)
+    print(f"starting on URL {url} and lot_id {lot_id}")
     capture = cv2.VideoCapture(url, cv2.CAP_FFMPEG)
-    if capture and capture.isOpened():
+    if capture is not None and capture.isOpened():
         fps = int(capture.get(cv2.CAP_PROP_FPS))
         spf = 1 / fps
         counter = 0
@@ -42,13 +46,21 @@ def slice(url, lot_id):
 
             if counter % fps == 0:
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                print(frame.shape, str(frame.dtype))
 
-                msg = ImageMessage(topics.TOPIC_BACKEND, frame.shape, frame, str(frame.dtype), lot_id)
+                #msg = ImageMessage(topics.TOPIC_BACKEND, frame.shape, frame, str(frame.dtype), lot_id)
+                msg = ImageMessage(topics.TOPIC_BACKEND,
+                                   frame.shape,
+                                   frame,
+                                   str(frame.dtype),
+                                   lot_id)
 
                 print("Slicer: sending message")
                 counter = 0
                 producer.send(topics.TOPIC_IMAGE, msg.serialize())
-                producer.flush()
+                print("Slicer: message sent")
+                producer.flush(300)
+                print("Slicer: message flushed")
 
 def set_settings_running(lot_id, running):
     settings = SettingsModel.objects.get(lot_id=lot_id)

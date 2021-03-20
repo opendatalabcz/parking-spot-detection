@@ -14,11 +14,15 @@ from .scene_manager import SceneManager
 from datetime import *
 from common.states import ACCEPTED, BLOCKER
 from common.settings import CLASSIFY_PERIOD_SECONDS
+import logging 
 
+logging.error('Creating consumer')
 consumer = MessageConsumer([topics.TOPIC_DETECT, topics.TOPIC_IMAGE, topics.TOPIC_STATUS],
                            value_deserializer=lambda val: val.decode("UTF-8"),
                            fetch_max_bytes=1024 * 1024 * 40, max_partition_fetch_bytes=1024 * 1024 * 50)
+logging.error('Creating producer')
 producer = MessageProducer(value_serializer=lambda val: val.encode("UTF-8"), max_request_size=3173440261)
+logging.error('Producer and consumer created.')
 
 
 def handle_detect_message(message):
@@ -40,14 +44,17 @@ def handle_detect_message(message):
         spot.save()
 
     print("Updating ParkingSpotModels")
-    # msg = SpotterMesssage(msg.timestamp, msg.lot_id, msg.image, serialized_rects)
-    # producer.send(topics.TOPIC_SPOT, msg.serialize())
+    print(scene)
+    print(updated)
+    # TODO: Solve serialized_rects
+    msg = SpotterMesssage(msg.timestamp, msg.lot_id, msg.image, updated)
+    producer.send(topics.TOPIC_SPOT, msg.serialize())
 
-    import cv2
-    manager = SceneManager(scene)
-    cv2.imshow("win", manager.visualize(msg.image, scene))
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        pass
+    # import cv2
+    # manager = SceneManager(scene)
+    # cv2.imshow("win", manager.visualize(msg.image, scene))
+    # if cv2.waitKey(1) & 0xFF == ord('q'):
+    #   pass
 
 
 LAST_CLASSIFICATION: datetime = None

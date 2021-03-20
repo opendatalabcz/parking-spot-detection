@@ -9,6 +9,7 @@ from common.producers import MessageProducer
 from datetime import datetime
 import tensorflow as tf
 from common.common_utils import timed
+import logging
 
 gpus = tf.config.experimental.list_physical_devices('GPU')
 if gpus:
@@ -18,7 +19,6 @@ if gpus:
   except RuntimeError as e:
     print(e)
 
-matplotlib.use('TkAgg')
 WEIGHTS_PATH = "mrcnn/mask_rcnn_coco.h5"
 
 mask = MaskModel()
@@ -26,8 +26,11 @@ mask.load_weights(WEIGHTS_PATH)
 
 car_detector = MaskCarDetector(mask.model)
 
+logging.error("Creating consumer")
 consumer = MessageConsumer([topics.TOPIC_IMAGE], value_deserializer=lambda val: val.decode("UTF-8"), fetch_max_bytes=1024*1024*40, max_partition_fetch_bytes=1024*1024*50)
+logging.error("Creating producer")
 producer = MessageProducer(value_serializer=lambda val: val.encode("UTF-8"), max_request_size=3173440261)
+logging.error("Producer & consumer created")
 
 @timed
 def handle_image_message(msg):
