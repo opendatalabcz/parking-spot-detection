@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "axios": "^0.19.2",
-    "chart.js": "^2.9.3",
+    "chart.js": "^2.9.4",
     "chartjs-plugin-zoom": "^0.7.5",
     "core-js": "^3.6.4",
     "konva": "^4.1.6",
