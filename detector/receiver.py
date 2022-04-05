@@ -1,15 +1,17 @@
+import logging
+from datetime import datetime
+
 import cv2
 import matplotlib
+import tensorflow as tf
+from common import topics
+from common.common_utils import timed
+from common.consumers import MessageConsumer
+from common.messages import DetectorMessage, ImageMessage
+from common.producers import MessageProducer
+
 from car_detectors import MaskCarDetector
 from models import MaskModel
-from common import topics
-from common.consumers import MessageConsumer
-from common.messages import ImageMessage, DetectorMessage
-from common.producers import MessageProducer
-from datetime import datetime
-import tensorflow as tf
-from common.common_utils import timed
-import logging
 
 gpus = tf.config.experimental.list_physical_devices('GPU')
 if gpus:
@@ -19,7 +21,7 @@ if gpus:
   except RuntimeError as e:
     print(e)
 
-WEIGHTS_PATH = "mrcnn/mask_rcnn_coco.h5"
+WEIGHTS_PATH = "detector/mrcnn/mask_rcnn_coco.h5"
 
 mask = MaskModel()
 mask.load_weights(WEIGHTS_PATH)
