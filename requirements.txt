@@ -136,7 +136,7 @@ torchvision
 tornado==6.0.3
 tqdm==4.45.0
 traitlets==4.3.3
-Twisted==19.10.0
+Twisted==22.4.0
 txaio==20.4.1
 urllib3==1.26.5
 wcwidth==0.1.8
